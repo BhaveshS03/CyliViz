@@ -142,6 +142,7 @@ layout = html.Div(
         Input("login-link", "n_clicks"),
         Input("signup-button-submit", "n_clicks")
     ],
+
     [
         State("login-username", "value"),
         State("login-password", "value"),
@@ -159,7 +160,7 @@ def manage_forms(login_clicks, signup_link_clicks, login_link_clicks, signup_sub
         if not login_username or not login_password:
             return "Please enter both fields.", "", {"color": "#D32F2F"}, {}, {"display": "block"}, {"display": "none"}, None
         if user_credentials.get(login_username) == login_password:
-            return "Login successful! Redirecting...", "", {"color": "#388E3C"}, {}, {"display": "none"}, {"display": "none"}, "/home"
+            return "Login successful! Redirecting...", "", {"color": "#388E3C"}, {}, {"display": "none"}, {"display": "none"}, "/main"
         return "Invalid credentials.", "", {"color": "#D32F2F"}, {}, {"display": "block"}, {"display": "none"}, None
 
     # If Signup button is clicked
