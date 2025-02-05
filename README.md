@@ -1,3 +1,4 @@
-pip install dash numpy pandas dash_bootstrap_components
+pip install -r requirements.txt
 
+For Standalone Version
 python ./app.py
