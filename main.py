@@ -213,8 +213,8 @@ def create_2d_figure(property_value: np.ndarray, rows: int, cols: int) -> go.Fig
     z = np.linspace(0, rows, rows)
     theta, z_grid = np.meshgrid(theta, z)
     valid_data = property_value[property_value != -1]  # Exclude placeholder values
-    vmin = np.min(valid_data)-1
-    vmax = np.max(valid_data)
+    vmin = np.min(valid_data)//1
+    vmax = np.max(valid_data)//1
     
     hover_text = [[f"Row: {i}, Column: {j}, value: {property_value[i][j]}"
                    for j in range(cols)] for i in range(rows)]
@@ -332,6 +332,26 @@ def init_app() -> Dash:
     
     return app
 
+def run_standalone(app: Dash):
+    """
+    To run app server and webview
+    """
+    import threading
+    import webview
+    from waitress import serve
+
+    def run_server():
+        serve(app.server, host="0.0.0.0", port=8080)
+
+    # Start the Dash server in a background thread.
+    threading.Thread(target=run_server, daemon=True).start()
+
+    # Open the desktop window pointing to the local Dash app.
+    window = webview.create_window("InjoTech App", "http://127.0.0.1:8080")
+    webview.start()
+
 if __name__ == "__main__":
     app = init_app()
-    app.run_server(debug=True)
+    # app.run_server(debug=True)
+    run_standalone(app)
+
