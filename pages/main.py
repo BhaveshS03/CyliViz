@@ -1,10 +1,16 @@
-import dash 
-from dash import dcc, html, Input, Output, State,callback
-import base64
+# import dash 
 import io
+import base64
+from dash import Dash, html, dcc
+from dash.dependencies import Input, Output, State
+import dash_bootstrap_components as dbc
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
+import webview
+from waitress import serve
+import threading
+import sys,time
 
 def expand_data(df, OuterDia, TestArea, H, TH):
     pv = df.to_numpy()
@@ -12,6 +18,7 @@ def expand_data(df, OuterDia, TestArea, H, TH):
     total_circumference = np.pi * OuterDia
     height = H  # mm
     total_height = TH  # mm
+    fill_value=-1
 
     # Calculate the expansion factor
     expansion_factor_cols = (total_circumference / TestArea)
@@ -24,13 +31,12 @@ def expand_data(df, OuterDia, TestArea, H, TH):
 
     # Fill values into the expanded DataFrame
     expanded_df.iloc[:rows, :cols] = df.values
+    expanded_df.fillna(fill_value, inplace=True)
 
     return expanded_df
 
-# Create Dash app
-# app = dash.Dash(__name__)
-dash.register_page(__name__)
-# Define initial variable values
+app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+
 variable_values = {
     "OuterDia": "1",
     "TestArea": "1",
@@ -39,8 +45,21 @@ variable_values = {
 }
 
 # App layout
-layout = html.Div([
+app.layout = html.Div([
+    html.Div([
     html.H1("Dynamic 2D & 3D Visualization from Excel Data", style={"color": "#2E3A59", "text-align": "center"}),
+    dbc.Modal(
+        [
+            dbc.ModalHeader("Large Modal Header"),
+            dbc.ModalBody("This is the content of a large modal. You can add more content here to make it as detailed as needed."),
+            dbc.ModalFooter(
+                dbc.Button("Close", id="close-modal", className="ml-auto", color="secondary")
+            ),
+        ],
+        id="large-modal",
+        is_open=False,
+        size="lg"  # Set modal size to large
+    ),
 
     # Upload Component
     dcc.Upload(
@@ -115,10 +134,34 @@ layout = html.Div([
 
     # Status Message
     html.Div(id="status-message", style={"margin-top": "20px", "color": "#D32F2F", "text-align": "center"}),
+    # html.Div([
+    #     html.Button("Review", id="open-modal", n_clicks=0, style={
+    #         "margin-right": "20px", 
+    #         "background-color": "#6A1B9A",  # Light Green
+    #         "color": "white", 
+    #         "border": "none", 
+    #         "padding": "15px 30px", 
+    #         "cursor": "pointer", 
+    #         "font-size": "16px", 
+    #         "border-radius": "8px", 
+    #         "transition": "all 0.3s ease",
+    #         "box-shadow": "0 4px 8px rgba(76, 175, 80, 0.3)"  # Soft shadow for depth
+    #     }, className="btn-animated"),
+    # ], style={"display": "flex", "justify-content": "center", "gap": "20px", "margin": "20px 0"}),
     html.Div(id='output', style={'margin-top': '20px'}),
-])
+]),])
 
-@callback(
+# @app.callback(
+#     Output("large-modal", "is_open"),
+#     [Input("open-modal", "n_clicks"), Input("close-modal", "n_clicks")],
+#     [State("large-modal", "is_open")]
+# )
+# def toggle_modal(open_clicks, close_clicks, is_open):
+#     if open_clicks or close_clicks:
+#         return not is_open
+#     return is_open
+
+@app.callback(
     Output('output', 'children'),
     [Input('input-OuterDia', 'value'),
      Input('input-TestArea', 'value'),
@@ -133,8 +176,8 @@ def update_variables(OuterDia, TestArea, height, TotalHeight):
     variable_values['height'] = height if height else variable_values['height']
     variable_values['TotalHeight'] = TotalHeight if TotalHeight else variable_values['TotalHeight']
 
-# Callback for generating the graph
-@callback(
+# app.callback for generating the graph
+@app.callback(
     Output('dropdown', 'options'),
     Output("graph", "figure"),
     Output("status-message", "children"),
@@ -183,7 +226,12 @@ def update_graph(contents, n_clicks_2d, n_clicks_3d, value, filename):
             # Convert to x and y coordinates for the surface
             x = radius * np.cos(theta)
             y = radius * np.sin(theta)
-
+            colorscale = [
+                [0.0, 'gray'],       # Placeholder value color
+                [0.01, 'red'],       # Start of actual data range
+                [0.20, 'yellow'],
+                [1.0, 'green']       # End of data range
+            ]
             # Create hover text for row and column
             hover_text = np.empty_like(x, dtype=object)
             for i in range(rows):
@@ -197,7 +245,9 @@ def update_graph(contents, n_clicks_2d, n_clicks_3d, value, filename):
                     z=z_grid,
                     x=x,
                     y=y,
-                    colorscale='Plasma_r',
+                    cmin=13,    # Minimum of actual data range
+                    cmax=25,     # Maximum of actual data range
+                    colorscale=colorscale,
                     surfacecolor=property_value,
                     colorbar=dict(title="Property Value"),
                     text=hover_text,  # Add hover text
@@ -234,12 +284,14 @@ def update_graph(contents, n_clicks_2d, n_clicks_3d, value, filename):
                 )
 
             else:
-                # Generate 2D heatmap visualization
+               # Generate 2D heatmap visualization
                 fig = go.Figure(data=[go.Heatmap(
                     x=np.ravel(theta),
                     y=np.ravel(z_grid),
                     z=np.ravel(property_value),
-                    colorscale="Plasma_r",
+                    colorscale=colorscale,
+                    zmin=13,    # Minimum of actual data range
+                    zmax=25,     # Maximum of actual data range
                     colorbar=dict(title="Property Value"),
                     text=hover_text,  # Add hover text
                     hoverinfo='text'  # Show text on hover
@@ -257,5 +309,5 @@ def update_graph(contents, n_clicks_2d, n_clicks_3d, value, filename):
 
     return [], go.Figure(), "No file uploaded."
 
-# if __name__ == "__main__":
-#     app.run_server(debug=True)
+if __name__ == "__main__":
+    app.run_server(debug=True)

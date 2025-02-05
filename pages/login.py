@@ -4,8 +4,6 @@ import dash_bootstrap_components as dbc
 import flask
 
 # Initialize Dash app
-# server = flask.Flask(__name__)  # Shared server
-# app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP], server=server)
 
 dash.register_page(__name__, path='/login')
 

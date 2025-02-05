@@ -22,7 +22,7 @@ layout = html.Div(
         "position": "fixed",  # Makes the navbar fixed at the top
         "top": 0,
         "left":0,   
-        "width": "95%",
+        "width": "100%",
         "zIndex": 1000  
     },
     children=[
@@ -30,7 +30,7 @@ layout = html.Div(
         html.Div(
             children=[
                 html.Img(
-                    src="/assets/logo.png",  
+                    src="/assets/logo.jpg",  
                     style={
                         "height": "60px",
                         "marginRight": "20px",
@@ -237,7 +237,7 @@ html.Div(
                             "borderRadius": "10px"
                         },
                         children=[
-                            html.Img(src="/assets/heatmap_plasma.png", style={"width": "90%", "borderRadius": "10px", "marginBottom": "20px"}),  # Add the image here
+                            html.Img(src="/assets/heatmap_plasma.jpg", style={"width": "90%", "borderRadius": "10px", "marginBottom": "20px"}),  # Add the image here
                             html.H4("3D Surface Modeling", style={"color": "#6a0dad"}),
                             html.P("Explore how our app visualizes geospatial data in 3D, providing unparalleled clarity."),
                         ],
@@ -252,7 +252,7 @@ html.Div(
                             "borderRadius": "10px"
                         },
                         children=[
-                            html.Img(src="/assets/3d_cylinder_plasma.png", style={"width": "100%", "heigh": "100%", "borderRadius": "10px", "marginBottom": "20px"}),  # Add the image here
+                            html.Img(src="/assets/heatmap_plasma_3d.jpg", style={"width": "100%", "heigh": "100%", "borderRadius": "10px", "marginBottom": "20px"}),  # Add the image here
                             html.H4("Custom Solutions for Industries", style={"color": "#6a0dad"}),
                             html.P("Tailored visualizations for healthcare, finance, manufacturing, Retail & E-commerce, and more."),
                         ],
@@ -267,7 +267,7 @@ html.Div(
                             "borderRadius": "10px"
                         },
                         children=[
-                            html.Img(src="/assets/3d_surface_plasma.png", style={"width": "93%", "borderRadius": "10px", "marginBottom": "20px"}),  # Add the image here
+                            html.Img(src="/assets/3d_surface_plasma.jpg", style={"width": "93%", "borderRadius": "10px", "marginBottom": "20px"}),  # Add the image here
                             html.H4("Product Design Data Analysis", style={"color": "#6a0dad"}),
                             html.P("Witness the transformation of engineering specifications into interactive graphs. "),
                         ],
@@ -279,95 +279,95 @@ html.Div(
 ),
 
 
-        # Team Section
-        html.Div(
-            id="team",
-            style={"padding": "50px", "backgroundColor": "#f2f2f2"},
-            children=[
-                html.H2("Meet the Team", style={"textAlign": "center", "marginBottom": "40px", "color": "#6a0dad", "fontWeight": "bold"}),
-                dbc.Row(
-                    children=[
-                        dbc.Col(
-                            html.Div(
-                                style={
-                                    "textAlign": "center",
-                                    "padding": "20px",
-                                    "backgroundColor": "white",
-                                    "boxShadow": "0 4px 8px rgba(0, 0, 0, 0.1)",
-                                    "borderRadius": "10px"
-                                },
-                                children=[
-                                    html.Img(src="/assets/team1.jpg", style={"width": "200px", 
-        "height": "200px", 
-        "borderRadius": "50%", 
-        "objectFit": "cover"}),
-                                    html.H4("Bhavesh Sonar", style={"color": "#6a0dad", "marginTop": "10px"}),
-                                    html.P("CEO & Founder"),
-                                ],
-                            ), width=3
-                        ),
-                        dbc.Col(
-                            html.Div(
-                                style={
-                                    "textAlign": "center",
-                                    "padding": "20px",
-                                    "backgroundColor": "white",
-                                    "boxShadow": "0 4px 8px rgba(0, 0, 0, 0.1)",
-                                    "borderRadius": "10px"
-                                },
-                                children=[
-                                   html.Img(src="/assets/team2.jpg", style={"width": "200px", 
-        "height": "200px", 
-        "borderRadius": "50%", 
-        "objectFit": "cover"}),
+        # # Team Section
+        # html.Div(
+        #     id="team",
+        #     style={"padding": "50px", "backgroundColor": "#f2f2f2"},
+        #     children=[
+        #         html.H2("Meet the Team", style={"textAlign": "center", "marginBottom": "40px", "color": "#6a0dad", "fontWeight": "bold"}),
+        #         dbc.Row(
+        #             children=[
+        #                 dbc.Col(
+        #                     html.Div(
+        #                         style={
+        #                             "textAlign": "center",
+        #                             "padding": "20px",
+        #                             "backgroundColor": "white",
+        #                             "boxShadow": "0 4px 8px rgba(0, 0, 0, 0.1)",
+        #                             "borderRadius": "10px"
+        #                         },
+        #                         children=[
+        #                             html.Img(src="/assets/team1.jpg", style={"width": "200px", 
+        # "height": "200px", 
+        # "borderRadius": "50%", 
+        # "objectFit": "cover"}),
+        #                             html.H4("Bhavesh Sonar", style={"color": "#6a0dad", "marginTop": "10px"}),
+        #                             html.P("CEO & Founder"),
+        #                         ],
+        #                     ), width=3
+        #                 ),
+        #                 dbc.Col(
+        #                     html.Div(
+        #                         style={
+        #                             "textAlign": "center",
+        #                             "padding": "20px",
+        #                             "backgroundColor": "white",
+        #                             "boxShadow": "0 4px 8px rgba(0, 0, 0, 0.1)",
+        #                             "borderRadius": "10px"
+        #                         },
+        #                         children=[
+        #                            html.Img(src="/assets/team2.jpg", style={"width": "200px", 
+        # "height": "200px", 
+        # "borderRadius": "50%", 
+        # "objectFit": "cover"}),
 
-                                    html.H4("Tejashree Mulinti", style={"color": "#6a0dad", "marginTop": "10px"}),
-                                    html.P("Lead Designer"),
-                                ],
-                            ), width=3
-                        ),
-                        dbc.Col(
-                            html.Div(
-                                style={
-                                    "textAlign": "center",
-                                    "padding": "20px",
-                                    "backgroundColor": "white",
-                                    "boxShadow": "0 4px 8px rgba(0, 0, 0, 0.1)",
-                                    "borderRadius": "10px"
-                                },
-                                children=[
-                                    html.Img(src="/assets/team3.jpg", style={"width": "200px", 
-        "height": "200px", 
-        "borderRadius": "50%", 
-        "objectFit": "cover"}),
-                                    html.H4("Siddhi Adhav", style={"color": "#6a0dad", "marginTop": "10px"}),
-                                    html.P("Developer"),
-                                ],
-                            ), width=3
-                        ),
-                        dbc.Col(
-                            html.Div(
-                                style={
-                                    "textAlign": "center",
-                                    "padding": "20px",
-                                    "backgroundColor": "white",
-                                    "boxShadow": "0 4px 8px rgba(0, 0, 0, 0.1)",
-                                    "borderRadius": "10px"
-                                },
-                                children=[
-                                    html.Img(src="/assets/team4.jpg", style={"width": "200px", 
-        "height": "200px", 
-        "borderRadius": "50%", 
-        "objectFit": "cover"}),
-                                    html.H4("Ruturaj Patond", style={"color": "#6a0dad", "marginTop": "10px"}),
-                                    html.P("Marketing Head"),
-                                ],
-                            ), width=3
-                        ),
-                    ]
-                ),
-            ],
-        ),
+        #                             html.H4("Tejashree Mulinti", style={"color": "#6a0dad", "marginTop": "10px"}),
+        #                             html.P("Lead Designer"),
+        #                         ],
+        #                     ), width=3
+        #                 ),
+        #                 dbc.Col(
+        #                     html.Div(
+        #                         style={
+        #                             "textAlign": "center",
+        #                             "padding": "20px",
+        #                             "backgroundColor": "white",
+        #                             "boxShadow": "0 4px 8px rgba(0, 0, 0, 0.1)",
+        #                             "borderRadius": "10px"
+        #                         },
+        #                         children=[
+        #                             html.Img(src="/assets/team3.jpg", style={"width": "200px", 
+        # "height": "200px", 
+        # "borderRadius": "50%", 
+        # "objectFit": "cover"}),
+        #                             html.H4("Siddhi Adhav", style={"color": "#6a0dad", "marginTop": "10px"}),
+        #                             html.P("Developer"),
+        #                         ],
+        #                     ), width=3
+        #                 ),
+        #                 dbc.Col(
+        #                     html.Div(
+        #                         style={
+        #                             "textAlign": "center",
+        #                             "padding": "20px",
+        #                             "backgroundColor": "white",
+        #                             "boxShadow": "0 4px 8px rgba(0, 0, 0, 0.1)",
+        #                             "borderRadius": "10px"
+        #                         },
+        #                         children=[
+        #                             html.Img(src="/assets/team4.jpg", style={"width": "200px", 
+        # "height": "200px", 
+        # "borderRadius": "50%", 
+        # "objectFit": "cover"}),
+        #                             html.H4("Ruturaj Patond", style={"color": "#6a0dad", "marginTop": "10px"}),
+        #                             html.P("Marketing Head"),
+        #                         ],
+        #                     ), width=3
+        #                 ),
+        #             ]
+        #         ),
+        #     ],
+        # ),
 
         # Contact Section with Form
         html.Div(
