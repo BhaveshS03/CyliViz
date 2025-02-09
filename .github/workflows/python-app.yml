@@ -22,14 +22,14 @@ env:
   options: --onefile, --name "CyliViz", --windowed, 
 
 jobs:
-  pyinstaller-build:
+  CyliViz-Build:
     runs-on: windows-latest
     steps:
     - name: (Install) python
       uses: actions/setup-python@v4
       with:
-        python-version: ${{ env.python_ver }}
-        architecture: ${{ env.python_arch }}
+        python-version: ${{ $python_ver }}
+        architecture: ${{ $python_arch }}
     
     - name: (Install) python dev tools
       shell: bash
@@ -52,24 +52,24 @@ jobs:
       run: |
         pyinstaller \
           --clean \
-          --distpath ${{ env.exe_path }} \
+          --distpath ${{ $exe_path }} \
           ${{ steps.mods.outputs.supported_options }} \
-          "${{ env.spec }}"
+          "${{ $spec }}"
         
-        echo "✔️ Executable created successfully at _'${{ env.exe_path }}'_" >> $GITHUB_STEP_SUMMARY
-        echo "  - Python version used: '${{ env.python_ver }}'" >> $GITHUB_STEP_SUMMARY
-        echo "  - Python architecture used: '${{ env.python_arch }}'" >> $GITHUB_STEP_SUMMARY
+        echo "✔️ Executable created successfully at _'${{ $exe_path }}'_" >> $GITHUB_STEP_SUMMARY
+        echo "  - Python version used: '${{ $python_ver }}'" >> $GITHUB_STEP_SUMMARY
+        echo "  - Python architecture used: '${{ $python_arch }}'" >> $GITHUB_STEP_SUMMARY
 
     - name: (Upload) Executable
       id: artifact_upload
-      if: env.upload_exe_with_name != ''
-      uses: actions/upload-artifact@v3
+      if: $upload_exe_with_name != ''
+      uses: actions/upload-artifact@v4
       with:
-        name: ${{ env.upload_exe_with_name }}
-        path: ${{ env.exe_path }}
+        name: ${{ $upload_exe_with_name }}
+        path: ${{ $exe_path }}
     
     - name: (Upload) generated spec file - if .py
-      if: endsWith(env.spec, '.py')
+      if: endsWith($spec, '.py')
       uses: actions/upload-artifact@v3
       with:
         name: Generated spec file
@@ -80,7 +80,7 @@ jobs:
       if: steps.artifact_upload.conclusion == 'success'
       shell: bash
       run: |
-        echo "✔️ Executable **_(${{ env.upload_exe_with_name }})_** uploaded successfully" >> $GITHUB_STEP_SUMMARY
+        echo "✔️ Executable **_(${{ $upload_exe_with_name }})_** uploaded successfully" >> $GITHUB_STEP_SUMMARY
         echo "uploaded='true'" >> $GITHUB_OUTPUT
     
     - name: If executable upload fails
