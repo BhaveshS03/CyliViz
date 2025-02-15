@@ -150,25 +150,46 @@ def expand_data(df: pd.DataFrame, outer_dia: int, test_area: int, height: int, t
     
     return expanded_df
 
+def extract_values(property_value):
+    valid_data = property_value[property_value != -1]  # Exclude placeholder values
+    vmin = np.min(valid_data)//1
+    vmax = np.max(valid_data)//1
+    z_norm = np.linspace(0, 1, 50)
+    # If using arr
+    # z_norm = (valid_data-np.min(valid_data))/(np.max(valid_data)-np.min(valid_data))
+    return z_norm,vmin,vmax
+
 def create_3d_figure(property_value: np.ndarray, radius: float, rows: int, cols: int) -> go.Figure:
     """Generate 3D visualization."""
     theta = np.linspace(0, 2 * np.pi, cols)
     z = np.linspace(0, rows, rows)
     theta, z_grid = np.meshgrid(theta, z)
 
-    valid_data = property_value[property_value != -1]  # Exclude placeholder values
-    vmin = np.min(valid_data)
-    vmax = np.max(valid_data)
-    
     x = radius * np.cos(theta)
     y = radius * np.sin(theta)
+
+    z_norm,vmin,vmax = extract_values(property_value)
 
     hover_text = np.empty_like(x, dtype=object)
     for i in range(rows):
         for j in range(cols):
             hover_text[i, j] = f"Row: {i}, Column: {j}, value: {property_value[i][j]}"
-    
+
     fig = go.Figure(data=[go.Surface(
+        z=z_grid,
+        x=x,
+        y=y,
+        colorscale=COLORSCALE,
+        surfacecolor=z_norm,
+        colorbar=dict(
+                title="Thickness %",
+                tickformat=".0%",  # Formats tick labels as percentages
+                x=-0.2            # Position of the first colorbar
+            ),
+        text=hover_text,
+        hoverinfo='text'
+    )])
+    fig.add_trace(go.Surface(
         z=z_grid,
         x=x,
         y=y,
@@ -176,10 +197,10 @@ def create_3d_figure(property_value: np.ndarray, radius: float, rows: int, cols:
         cmax=vmax,
         colorscale=COLORSCALE,
         surfacecolor=property_value,
-        colorbar=dict(title="Property Value"),
+        colorbar=dict(title="Thickness (in mm)"),
         text=hover_text,
         hoverinfo='text'
-    )])
+    ))
     
     # Add grid lines
     for i in range(rows):
@@ -207,30 +228,43 @@ def create_3d_figure(property_value: np.ndarray, radius: float, rows: int, cols:
     
     return fig
 
-def create_2d_figure(property_value: np.ndarray, rows: int, cols: int) -> go.Figure:
+def create_2d_figure(df: np.ndarray, property_value: np.ndarray, rows: int, cols: int) -> go.Figure:
     """Generate 2D visualization."""
     theta = np.linspace(0, 2 * np.pi, cols)
     z = np.linspace(0, rows, rows)
     theta, z_grid = np.meshgrid(theta, z)
-    valid_data = property_value[property_value != -1]  # Exclude placeholder values
-    vmin = np.min(valid_data)//1
-    vmax = np.max(valid_data)//1
-    
+
+    z_norm,vmin,vmax = extract_values(property_value)
+
     hover_text = [[f"Row: {i}, Column: {j}, value: {property_value[i][j]}"
                    for j in range(cols)] for i in range(rows)]
-    
+
     fig = go.Figure(data=[go.Heatmap(
+        x=np.ravel(theta),
+        y=np.ravel(z_grid),
+        z=np.ravel(z_norm),
+        colorscale=COLORSCALE,
+        colorbar=dict(
+                title="Thickness %",
+                tickformat=".0%",  # Formats tick labels as percentages
+                x=-0.2            # Position of the first colorbar
+            ),
+        text=hover_text,
+        name="Data Points"
+    )])
+
+    fig.add_trace(go.Heatmap(
         x=np.ravel(theta),
         y=np.ravel(z_grid),
         z=np.ravel(property_value),
         colorscale=COLORSCALE,
         zmin=vmin,
         zmax=vmax,
-        colorbar=dict(title="Property Value"),
+        colorbar=dict(title="Thickness (in mm)"),
         text=hover_text,
         hoverinfo='text'
-    )])
-    
+    ))
+
     fig.update_layout(
         title="2D Heatmap Visualization",
         xaxis=dict(title="Theta/Angle"),
@@ -238,6 +272,7 @@ def create_2d_figure(property_value: np.ndarray, rows: int, cols: int) -> go.Fig
     )
     
     return fig
+
 
 def process_excel_data(contents: str, filename: str, sheet_index: int) -> Tuple[pd.DataFrame, List[Dict[str, str]]]:
     """Process uploaded Excel file and return dataframe and sheet options."""
@@ -323,11 +358,12 @@ def init_app() -> Dash:
             if n_clicks_3d > n_clicks_2d:
                 fig = create_3d_figure(property_value, radius, rows, cols)
             else:
-                fig = create_2d_figure(property_value, rows, cols)
+                fig = create_2d_figure(df, property_value, rows, cols)
             
             return sheet_options, fig, ""
             
         except Exception as e:
+            print(str(e))
             return [], go.Figure(), f"Error: {str(e)}"
     
     return app
@@ -352,6 +388,6 @@ def run_standalone(app: Dash):
 
 if __name__ == "__main__":
     app = init_app()
-    # app.run_server(debug=True)
-    run_standalone(app)
+    app.run_server(debug=True)
+    #run_standalone(app)
 
