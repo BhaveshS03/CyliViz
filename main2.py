@@ -1,4 +1,5 @@
 import io
+import sys
 import base64
 from typing import List, Tuple, Dict, Any
 import numpy as np
@@ -447,6 +448,9 @@ def run_standalone(app_manager: DashAppManager):
 
 
 if __name__ == "__main__":
+    exe = True if len(sys.argv)>1 else False
     app_manager = init_app()
-    app_manager.app.run_server(debug=True)
-    #run_standalone(app_manager)
+    if (exe):   
+        run_standalone(app_manager)
+    else:
+        app_manager.app.run_server(debug=True)

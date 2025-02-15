@@ -67,13 +67,6 @@ jobs:
         with:
           name: ${{ env.UPLOAD_EXE_WITH_NAME }}
           path: ${{ env.EXE_PATH }}
-      
-      - name: (Upload) Generated Spec File
-        if: endsWith(env.SPEC, '.py')
-        uses: actions/upload-artifact@v4
-        with:
-          name: Generated spec file
-          path: main.spec  # Hardcoded since there's no `steps.mods.outputs.spec_name`
 
       - name: If Executable Upload Success
         id: exe_uploading
