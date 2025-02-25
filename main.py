@@ -450,7 +450,7 @@ def run_standalone(app_manager: DashAppManager):
 if __name__ == "__main__":
     exe_flag = False if len(sys.argv)>1 else True
     app_manager = init_app()
-    if (exe_flag):
-        run_standalone(app_manager)
-    else:
-        app_manager.app.run_server(debug=True)
+    # if (exe_flag):
+    #     run_standalone(app_manager)
+    # else:
+    app_manager.app.run_server(debug=True)
