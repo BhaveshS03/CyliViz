@@ -1,427 +1,135 @@
-import dash
-from dash import dcc, html
-import dash_bootstrap_components as dbc
+from dash import html, Output, Input, callback,dcc
+from components.UIComponents import UIComponents
 
-# Initialize the Dash app
-dash.register_page(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP],path='/')
-
-# Define the layout
-layout = html.Div(
-    style={"fontFamily": "Arial, sans-serif", "backgroundColor": "#f8f9fa", "margin": "0", "padding": "0"},
-    children=[
-        # Navigation Bar
-        html.Div(
-    style={
-        "display": "flex",
-        "justifyContent": "space-between",
-        "alignItems": "center",
-        "padding": "0px 50px",
-        "backgroundColor": "#6a0dad",
-        "color": "white",
-        "boxShadow": "0 4px 6px rgba(0, 0, 0, 0.1)",
-        "position": "fixed",  # Makes the navbar fixed at the top
-        "top": 0,
-        "left":0,   
-        "width": "100%",
-        "zIndex": 1000  
-    },
-    children=[
-        # Logo Section
-        html.Div(
-            children=[
-                html.Img(
-                    src="/assets/logo.jpg",  
-                    style={
-                        "height": "60px",
-                        "marginRight": "20px",
-                    }
-                ),
-                html.Div("ExcelXpert", style={"fontSize": "24px", "fontWeight": "bold"}),
-            ],
-            style={"display": "flex", "alignItems": "center"}
+"""Create the main application layout."""
+layout = html.Div([
+        html.H1(
+            "Cylinder 2D & 3D Visualization",
+            style={"color": "#2E3A59", "text-align": "center"}
         ),
-        
-        # Links Section
         html.Div(
-            children=[
-                html.A(
-                    "Home", href="#", 
-                    style={
-                        "color": "white", 
-                        "marginRight": "20px", 
-                        "textDecoration": "none", 
-                        "fontWeight": "bold", 
-                        "fontSize": "18px",
-                    },
-                    className="nav-link"
-                ),
-                html.A(
-                    "About", href="#about", 
-                    style={
-                        "color": "white", 
-                        "marginRight": "20px", 
-                        "textDecoration": "none", 
-                        "fontWeight": "bold", 
-                        "fontSize": "18px",
-                    },
-                    className="nav-link"
-                ),
-                html.A(
-                    "Services", href="#services", 
-                    style={
-                        "color": "white", 
-                        "marginRight": "20px", 
-                        "textDecoration": "none", 
-                        "fontWeight": "bold", 
-                        "fontSize": "18px",
-                    },
-                    className="nav-link"
-                ),
-                html.A(
-                    "Portfolio", href="#portfolio", 
-                    style={
-                        "color": "white", 
-                        "marginRight": "20px", 
-                        "textDecoration": "none", 
-                        "fontWeight": "bold", 
-                        "fontSize": "18px",
-                    },
-                    className="nav-link"
-                ),
-                html.A(
-                    "Team", href="#team", 
-                    style={
-                        "color": "white", 
-                        "marginRight": "20px", 
-                        "textDecoration": "none", 
-                        "fontWeight": "bold", 
-                        "fontSize": "18px",
-                    },
-                    className="nav-link"
-                ),
-                html.A(
-                    "Contact", href="#contact", 
-                    style={
-                        "color": "white", 
-                        "textDecoration": "none", 
-                        "fontWeight": "bold", 
-                        "fontSize": "18px",
-                    },
-                    className="nav-link"
-                ),
-            ],
-            style={"display": "flex", "alignItems": "center"}
+            id="status-message",
+            style={"margin-top": "20px", "color": "#D32F2F", "text-align": "center"}
         ),
-    ],
-),
+        # Input Fields
+            html.Div([
+                html.H3("INJOTECH INDIA PVT. LTD", style={"text-align": "center", "font-size": "18px"}),
+                html.H5("WALL THICKNESS MEASUREMENT REPORT", style={"text-align": "center", "font-size": "14px", "margin-top": "5px"})
+            ], style={"margin-bottom": "10px"}),
 
+            html.Div([
+                UIComponents.create_input_field("REPORT NO", "report-no"),
+                UIComponents.create_input_field("CLIENT NAME", "client-name"),
+                UIComponents.create_input_field("ADDRESS", "address"),
+                UIComponents.create_date_picker("Date","date"),
+            ], style={"margin-bottom": "8px"}),
 
-        # Hero Section
+            html.Div([
+                UIComponents.create_input_field("PO NUMBER", "po-number"),
+                UIComponents.create_input_field("DATE OF INSPECTION", "date-inspection"),
+            ], style={"margin-bottom": "12px"}),
+
+            html.Div([
+                html.H6("EQUIPMENT DETAILS", style={"font-weight": "bold", "margin-bottom": "5px", "font-size": "12px"})
+            ]),
+
+            html.Div([
+                UIComponents.create_input_field("MAKE", "make"),
+                UIComponents.create_input_field("MODEL", "model"),
+                UIComponents.create_input_field("SR. NO.", "sr-no"),
+                UIComponents.create_date_picker("CALIBRATION DUE DATE", "calibration-due-date"),
+            ], style={"margin-bottom": "12px"}),
+
+            html.Div([
+                html.H6("PART DETAILS", style={"font-weight": "bold", "margin-bottom": "5px", "font-size": "12px"})
+            ]),
+
+            html.Div([
+                UIComponents.create_input_field("PART NAME", "part-name"),
+                UIComponents.create_input_field("MATERIAL", "material"),
+                UIComponents.create_input_field("DRAWING NUMBER", "drawing-number"),
+            ], style={"margin-bottom": "8px"}),
+
+            html.Div([
+                html.H6("DIMENSIONS", style={"font-weight": "bold", "margin-bottom": "5px", "font-size": "12px"})
+            ]),
+
+            html.Div([
+                UIComponents.create_input_field("Outer Diameter", "input-OuterDia"),
+                UIComponents.create_input_field("Test Area","input-TestArea"),
+                UIComponents.create_input_field("Height", "input-Height"),
+                UIComponents.create_input_field("Total Height", "input-TotalHeight"),
+                UIComponents.create_input_field("NOMINAL THICKNESS", "nominal-thickness"),
+                UIComponents.create_input_field("DESIGN THICKNESS", "design-thickness"),
+            ], style={"margin-bottom": "10px"}),
+
+            html.Div([
+                html.P("Incremental thickness for wall loss from 80% to each 1%, represented with a color code.", style={"font-size": "10px", "font-style": "italic", "color": "#777", "margin-bottom": "5px"})
+            ], style={"margin-bottom": "8px"}),
+
         html.Div(
-            style={
-                "textAlign": "center",
-                "padding": "100px 20px",
-                "background": "linear-gradient(135deg, #a155b9, #6a0dad)",
-                "color": "white",
-                "boxShadow": "0 4px 8px rgba(0, 0, 0, 0.2)",
-            },
-            children=[
-                html.H1("Welcome to ExcelXpert App", style={"fontSize": "48px", "marginBottom": "28px", "fontWeight": "bold", "marginTop": "50px"}),
-                html.P("Transforming Your Data Into Stunning Visualizations: 2D & 3D Insights Made Effortless", style={"fontSize": "28px", "fontWeight": "bold"}),
-                html.P("Discover the power of dynamic data visualization with our app. Whether it's 2D graphs or immersive 3D models, we empower you to interpret your Excel data like never before.", style={"fontSize": "20px"}),
-                html.P("Upload, customize, and explore your insights are just a click away.", style={"fontSize": "20px"}),
-                dcc.Link('Get Started', href='/login',style={
+            id="validation-message",
+            style={"color": "#D32F2F", "text-align": "center", "margin-bottom": "10px"}
+        ),
+    html.Div(
+            dcc.Link(
+                'Next',
+                href='/view',
+                style={
                     "padding": "10px 20px",
                     "fontSize": "18px",
-                    "backgroundColor": "white",
-                    "color": "#6a0dad",
+                    "backgroundColor": "#6a0dad",
+                    "color": "white",
                     "border": "none",
                     "cursor": "pointer",
-                    "borderRadius": "5px", "fontWeight": "bold",
-                    "boxShadow": "0 4px 6px rgba(0, 0, 0, 0.1)"
-                })
-            ],
-        ),
-
-        # About Section
-        html.Div(
-            id="about",
-            style={"padding": "50px", "backgroundColor": "#f2f2f2"},
-            children=[
-                html.H2("About Us", style={"textAlign": "center", "marginBottom": "40px", "color": "#6a0dad", "fontWeight": "bold"}),
-                html.P(
-                    "At ExcelXpert, we are passionate about turning raw data into meaningful stories. Our platform provides an innovative way to visualize Excel data dynamically, helping you analyze and present complex information with ease. From researchers to analysts, anyone can leverage our user-friendly interface to gain deeper insights. Join us in revolutionizing the way data is understood and communicated. "
-                    ,
-                    style={"textAlign": "center", "fontSize": "20px", "maxWidth": "1000px", "margin": "0 auto"}
-                ),
-            ],
-        ),
-
-        # Services Section
-        html.Div(
-            id="services",
-            style={"padding": "50px", "backgroundColor": "white"},
-            children=[
-                html.H2("Our Services", style={"textAlign": "center", "marginBottom": "40px", "color": "#6a0dad", "fontWeight": "bold"}),
-                dbc.Row(
-                    children=[
-                        dbc.Col(
-                            html.Div(
-                                style={
-                                    "padding": "20px",
-                                    "backgroundColor": "#f8f9fa",
-                                    "boxShadow": "0 4px 8px rgba(0, 0, 0, 0.1)",
-                                    "borderRadius": "10px"
-                                },
-                                children=[
-                                    html.H4("Dynamic 2D Visualization", style={"color": "#6a0dad"}),
-                                    html.P("Transform complex data into crisp, interactive 2D graphs, including bar charts, line graphs, scatter plots, and more. "
-                                           "Customize colors, labels, and layouts to match your presentation style. "
-                                           "Perfect for reports, academic projects, and quick data analysis."
-                                           ),
-                                ],
-                            ), width=4
-                        ),
-                        dbc.Col(
-                            html.Div(
-                                style={
-                                    "padding": "20px",
-                                    "backgroundColor": "#f8f9fa",
-                                    "boxShadow": "0 4px 8px rgba(0, 0, 0, 0.1)",
-                                    "borderRadius": "10px"
-                                },
-                                children=[
-                                    html.H4("Immersive 3D Visualization", style={"color": "#6a0dad"}),
-                                    html.P("Step beyond static visuals with 3D surface plots, wireframes, and volumetric data renderings. "
-                                           "Rotate, zoom, and explore data in an interactive 3D space to uncover hidden patterns. "
-                                           "Ideal for geospatial data, engineering designs, and advanced analytics. "),
-                                ],
-                            ), width=4
-                        ),
-                        dbc.Col(
-                            html.Div(
-                                style={
-                                    "padding": "20px",
-                                    "backgroundColor": "#f8f9fa",
-                                    "boxShadow": "0 4px 8px rgba(0, 0, 0, 0.1)",
-                                    "borderRadius": "10px"
-                                },
-                                children=[
-                                    html.H4("Intuitive Parameter Adjustment", style={"color": "#6a0dad"}),
-                                    html.P("Modify parameters like axis ranges, grid density, and labels in real-time. "
-                                           "Use sliders, dropdowns, and other user-friendly controls to refine your visualizations. "
-                                           "Empower users of all technical levels to create polished outputs without coding knowledge. "
-                                           ),
-                                ],
-                            ), width=4
-                        ),
-                    ]
-                ),
-            ],
-        ),
-
-       # Portfolio Section
-html.Div(
-    id="portfolio",
-    style={"padding": "50px", "backgroundColor": "#f2f2f2"},
-    children=[
-        html.H2("Portfolio", style={"textAlign": "center", "marginBottom": "40px", "color": "#6a0dad", "fontWeight": "bold"}),
-        dbc.Row(
-            children=[
-                dbc.Col(
-                    html.Div(
-                        style={
-                            "padding": "20px",
-                            "backgroundColor": "white",
-                            "boxShadow": "0 4px 8px rgba(0, 0, 0, 0.1)",
-                            "borderRadius": "10px"
-                        },
-                        children=[
-                            html.Img(src="/assets/heatmap_plasma.jpg", style={"width": "90%", "borderRadius": "10px", "marginBottom": "20px"}),  # Add the image here
-                            html.H4("3D Surface Modeling", style={"color": "#6a0dad"}),
-                            html.P("Explore how our app visualizes geospatial data in 3D, providing unparalleled clarity."),
-                        ],
-                    ), width=4
-                ),
-                dbc.Col(
-                    html.Div(
-                        style={
-                            "padding": "20px",
-                            "backgroundColor": "white",
-                            "boxShadow": "0 4px 8px rgba(0, 0, 0, 0.1)",
-                            "borderRadius": "10px"
-                        },
-                        children=[
-                            html.Img(src="/assets/heatmap_plasma_3d.jpg", style={"width": "100%", "heigh": "100%", "borderRadius": "10px", "marginBottom": "20px"}),  # Add the image here
-                            html.H4("Custom Solutions for Industries", style={"color": "#6a0dad"}),
-                            html.P("Tailored visualizations for healthcare, finance, manufacturing, Retail & E-commerce, and more."),
-                        ],
-                    ), width=4
-                ),
-                dbc.Col(
-                    html.Div(
-                        style={
-                            "padding": "20px",
-                            "backgroundColor": "white",
-                            "boxShadow": "0 4px 8px rgba(0, 0, 0, 0.1)",
-                            "borderRadius": "10px"
-                        },
-                        children=[
-                            html.Img(src="/assets/3d_surface_plasma.jpg", style={"width": "93%", "borderRadius": "10px", "marginBottom": "20px"}),  # Add the image here
-                            html.H4("Product Design Data Analysis", style={"color": "#6a0dad"}),
-                            html.P("Witness the transformation of engineering specifications into interactive graphs. "),
-                        ],
-                    ), width=4
-                ),
-            ]
-        ),
-    ],
-),
-
-
-        # # Team Section
-        # html.Div(
-        #     id="team",
-        #     style={"padding": "50px", "backgroundColor": "#f2f2f2"},
-        #     children=[
-        #         html.H2("Meet the Team", style={"textAlign": "center", "marginBottom": "40px", "color": "#6a0dad", "fontWeight": "bold"}),
-        #         dbc.Row(
-        #             children=[
-        #                 dbc.Col(
-        #                     html.Div(
-        #                         style={
-        #                             "textAlign": "center",
-        #                             "padding": "20px",
-        #                             "backgroundColor": "white",
-        #                             "boxShadow": "0 4px 8px rgba(0, 0, 0, 0.1)",
-        #                             "borderRadius": "10px"
-        #                         },
-        #                         children=[
-        #                             html.Img(src="/assets/team1.jpg", style={"width": "200px", 
-        # "height": "200px", 
-        # "borderRadius": "50%", 
-        # "objectFit": "cover"}),
-        #                             html.H4("Bhavesh Sonar", style={"color": "#6a0dad", "marginTop": "10px"}),
-        #                             html.P("CEO & Founder"),
-        #                         ],
-        #                     ), width=3
-        #                 ),
-        #                 dbc.Col(
-        #                     html.Div(
-        #                         style={
-        #                             "textAlign": "center",
-        #                             "padding": "20px",
-        #                             "backgroundColor": "white",
-        #                             "boxShadow": "0 4px 8px rgba(0, 0, 0, 0.1)",
-        #                             "borderRadius": "10px"
-        #                         },
-        #                         children=[
-        #                            html.Img(src="/assets/team2.jpg", style={"width": "200px", 
-        # "height": "200px", 
-        # "borderRadius": "50%", 
-        # "objectFit": "cover"}),
-
-        #                             html.H4("Tejashree Mulinti", style={"color": "#6a0dad", "marginTop": "10px"}),
-        #                             html.P("Lead Designer"),
-        #                         ],
-        #                     ), width=3
-        #                 ),
-        #                 dbc.Col(
-        #                     html.Div(
-        #                         style={
-        #                             "textAlign": "center",
-        #                             "padding": "20px",
-        #                             "backgroundColor": "white",
-        #                             "boxShadow": "0 4px 8px rgba(0, 0, 0, 0.1)",
-        #                             "borderRadius": "10px"
-        #                         },
-        #                         children=[
-        #                             html.Img(src="/assets/team3.jpg", style={"width": "200px", 
-        # "height": "200px", 
-        # "borderRadius": "50%", 
-        # "objectFit": "cover"}),
-        #                             html.H4("Siddhi Adhav", style={"color": "#6a0dad", "marginTop": "10px"}),
-        #                             html.P("Developer"),
-        #                         ],
-        #                     ), width=3
-        #                 ),
-        #                 dbc.Col(
-        #                     html.Div(
-        #                         style={
-        #                             "textAlign": "center",
-        #                             "padding": "20px",
-        #                             "backgroundColor": "white",
-        #                             "boxShadow": "0 4px 8px rgba(0, 0, 0, 0.1)",
-        #                             "borderRadius": "10px"
-        #                         },
-        #                         children=[
-        #                             html.Img(src="/assets/team4.jpg", style={"width": "200px", 
-        # "height": "200px", 
-        # "borderRadius": "50%", 
-        # "objectFit": "cover"}),
-        #                             html.H4("Ruturaj Patond", style={"color": "#6a0dad", "marginTop": "10px"}),
-        #                             html.P("Marketing Head"),
-        #                         ],
-        #                     ), width=3
-        #                 ),
-        #             ]
-        #         ),
-        #     ],
-        # ),
-
-        # Contact Section with Form
-        html.Div(
-            id="contact",
-            style={"padding": "50px", "backgroundColor": "#6a0dad", "color": "white"},
-            children=[
-                html.H2("Contact Us", style={"textAlign": "center", "marginBottom": "40px", "fontWeight": "bold"}),
-                dbc.Row(
-                    justify="center",
-                    children=[
-                        dbc.Col(
-                            html.Div(
-                                style={
-                                    "maxWidth": "500px",
-                                    "margin": "0 auto",
-                                    "backgroundColor": "white",
-                                    "padding": "20px",
-                                    "borderRadius": "10px",
-                                    "boxShadow": "0 4px 8px rgba(0, 0, 0, 0.1)"
-                                },
-                                children=[
-                                    dcc.Input(placeholder="Your Name", style={
-                                        "width": "100%", "marginBottom": "15px", "padding": "10px", "borderRadius": "5px"
-                                    }),
-                                    dcc.Input(placeholder="Your Email", style={
-                                        "width": "100%", "marginBottom": "15px", "padding": "10px", "borderRadius": "5px"
-                                    }),
-                                    dcc.Textarea(placeholder="Your Message", style={
-                                        "width": "100%", "height": "100px", "marginBottom": "15px", "padding": "10px", "borderRadius": "5px"
-                                    }),
-                                    html.Button("Submit", style={
-                                        "width": "50%", "padding": "10px", "backgroundColor": "#6a0dad", "color": "white",
-                                        "border": "none", "borderRadius": "5px", "cursor": "pointer", "margin-left": "110px"
-                                    }),
-                                ],
-                            ),
-                            width=6,
-                        ),
-                    ],
-                ),
-            ],
-        ),
-
-        # Footer Section
-        html.Div(
-            style={
-                "textAlign": "center",
-                "padding": "20px",
-                "backgroundColor": "#6a0dad",
-                "color": "white"
+                    "borderRadius": "5px",
+                    "fontWeight": "bold",
+                    "boxShadow": "0 4px 6px rgba(0, 0, 0, 0.1)",
+                    "textDecoration": "none",
+                    "display": "inline-block"
+                }
+            ),
+            style={"textAlign": "center", "marginTop": "20px"}
+        )
+    ], 
+        style={
+            "width": "95%",
+            "max-width": "750px",
+            "margin": "20px auto",
+            "padding": "15px",
+            "border": "1px solid #ccc",
+            "border-radius": "8px",
+            "box-sizing": "border-box",
+            "background-color": "#fefefe",
+            "box-shadow": "0 2px 5px rgba(0,0,0,0.1)",
+            '@media (max-width: 768px)': {
+                'width': '98%',
+                'padding': '10px',
+                'margin': '10px auto',
             },
-            children=[
-                html.P("© 2025 ExcelXpert. Transforming spreadsheets into insights."),
-            ],
-        ),
-    ],
-)
+            '@media (min-width: 769px)': {
+                'width': '75%',
+            }
+        })
+
+def register_callbacks(app):
+    @callback(
+    [Output("data-store", "data"), Output("validation-message", "children")],
+    [Input("input-OuterDia", "value"), Input("input-TestArea", "value"), Input("input-Height", "value"), Input("input-TotalHeight", "value")],
+    prevent_initial_call=True)
+    def update_store(outer_dia, test_area, height, total_height):
+        """Show/hide upload button based on input validation."""
+        if not all([outer_dia, test_area, height, total_height]):
+            return None, "Please fill in all input fields to proceed"
+        try:
+            # Validate inputs are positive numbers
+            values = [float(x) for x in [outer_dia, test_area, height, total_height]]
+            if not all(v > 0 for v in values):
+                return None, "All values must be positive numbers"
+            elif height > total_height:
+                return None, "Total Height must be greater than calculated height"
+
+            return {"OD":outer_dia, "TA" : test_area,"HE": height,"TH": total_height}, ""
+
+        except ValueError:
+            return None, "All inputs must be valid numbers"
