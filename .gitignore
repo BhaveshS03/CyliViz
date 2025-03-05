@@ -1,1 +1,7 @@
 /.venv
+/build
+/main.spec
+/dist
+/pages/__pycache__
+/components/__pycache__
+/pages/__pycache__

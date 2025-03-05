@@ -2,29 +2,6 @@ from dash import html, dcc
 
 class UIComponents:
     @staticmethod
-    # def create_input_field(label: str, input_id: str) -> html.Div:
-    #     """Create a styled input field with label."""
-    #     return html.Div([
-    #     html.Label(f"{label}:", style={
-    #         "font-size": "12px",
-    #         "font-weight": "bold",
-    #         "color": "#333"
-    #     }),
-    #     dcc.Input(
-    #         id=input_id,
-    #         type='text',
-    #         placeholder=f'Enter {label}',
-    #         style={
-    #             "font-size": "12px",
-    #             "padding": "4px",
-    #             "width": "90%",
-    #             "text-align": "center",
-    #             "margin-bottom": "10px",
-    #             "border-radius": "10px"
-    #         }
-    #     )
-    # ], style={"width": "20%", "display": "inline-block", "margin": "2%"})
-
     def create_input_field(label: str, input_id: str) -> html.Div:
         """Create a styled input field with label."""
         return html.Div([

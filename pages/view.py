@@ -21,7 +21,6 @@ layout = html.Div([
         style={
             "width": "400px",
             "margin": "auto",
-            "margin-bottom": "20px",
             "border-radius": "8px"
         }
     ),
@@ -98,6 +97,9 @@ def register_callbacks(app):
             test_area = data["TA"]
             height = data["HE"]
             total_height = data["TH"]
+            nominal_thickness = int(data["NT"])
+            design_thickness = int(data["DT"])
+            threshold_thickness = int(data["TT"])
             if sheet_value == None: sheet_value=0
             df, sheet_options = DataProcessor.process_excel_data(contents, int(sheet_value))
             expanded_df = DataProcessor.expand_data(
@@ -120,11 +122,11 @@ def register_callbacks(app):
                 view_type = '3d' if button_id == "btn-3d" else '2d'
 
             if view_type == '3d':
-                fig = Visualizer.create_3d_figure(property_value, radius, rows, cols)
+                fig = Visualizer.create_3d_figure(property_value, radius, rows, cols, nominal_thickness, design_thickness, threshold_thickness)
             else:
-                fig = Visualizer.create_2d_figure(df.to_numpy(), property_value, rows, cols) # pass original df as numpy too
+                fig = Visualizer.create_2d_figure(df.to_numpy(), property_value, rows, cols, nominal_thickness, design_thickness, threshold_thickness)
 
-            return sheet_options, fig, "", {"property_value": property_value}
+            return sheet_options, fig, "", {"property_value": property_value, "NT":nominal_thickness, "DT":design_thickness, "TT":threshold_thickness }
         except Exception as e:
             print(str(e))
             return [], go.Figure(), f"Error: {str(e)}",{}

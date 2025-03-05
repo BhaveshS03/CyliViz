@@ -61,6 +61,7 @@ layout = html.Div([
                 UIComponents.create_input_field("Total Height", "input-TotalHeight"),
                 UIComponents.create_input_field("NOMINAL THICKNESS", "nominal-thickness"),
                 UIComponents.create_input_field("DESIGN THICKNESS", "design-thickness"),
+                UIComponents.create_input_field("THRESHOLD THICKNESS", "threshold-thickness"),
             ], style={"margin-bottom": "10px"}),
 
             html.Div([
@@ -115,11 +116,11 @@ layout = html.Div([
 def register_callbacks(app):
     @callback(
     [Output("data-store", "data"), Output("validation-message", "children")],
-    [Input("input-OuterDia", "value"), Input("input-TestArea", "value"), Input("input-Height", "value"), Input("input-TotalHeight", "value")],
+    [Input("input-OuterDia", "value"), Input("input-TestArea", "value"), Input("input-Height", "value"), Input("input-TotalHeight", "value"),Input("nominal-thickness", "value"),Input("design-thickness","value"),Input("threshold-thickness","value")],
     prevent_initial_call=True)
-    def update_store(outer_dia, test_area, height, total_height):
+    def update_store(outer_dia, test_area, height, total_height,nominal_thickness,design_thickness,threshold_thickness):
         """Show/hide upload button based on input validation."""
-        if not all([outer_dia, test_area, height, total_height]):
+        if not all([outer_dia, test_area, height, total_height,nominal_thickness,design_thickness,threshold_thickness]):
             return None, "Please fill in all input fields to proceed"
         try:
             # Validate inputs are positive numbers
@@ -129,7 +130,7 @@ def register_callbacks(app):
             elif height > total_height:
                 return None, "Total Height must be greater than calculated height"
 
-            return {"OD":outer_dia, "TA" : test_area,"HE": height,"TH": total_height}, ""
+            return {"OD":outer_dia, "TA" : test_area,"HE": height,"TH": total_height, "NT": nominal_thickness, "DT":design_thickness, "TT":threshold_thickness}, ""
 
         except ValueError:
             return None, "All inputs must be valid numbers"
