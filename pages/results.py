@@ -1,662 +1,470 @@
-# pages/results.py - Results page module without graphs
+# pages/results.py - Modern Results Page Module with Color Scheme
 import dash
 from dash import dcc, html, callback, Input, Output, State, dash_table
 import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
 from typing import Dict, List, Tuple
+import dash_bootstrap_components as dbc
 
-# Import the Visualizer class
-# from visualizer import Visualizer
+# Modern Color Palette
+PRIMARY_COLOR = "#007bff"        # Bootstrap primary blue
+SECONDARY_COLOR = "#6c757d"      # Bootstrap secondary gray
+ACCENT_COLOR = "#28a745"         # Bootstrap success green
+WARNING_COLOR = "#ffc107"        # Bootstrap warning yellow
+DANGER_COLOR = "#dc3545"         # Bootstrap danger red
+LIGHT_GRAY = "#f8f9fa"          # Bootstrap light gray
+DARK_GRAY = "#343a40"           # Bootstrap dark gray
+TEXT_COLOR = "#495057"           # Default text color
 
-import numpy as np
-from typing import Dict, List, Optional
-
-# class ResultAnalyzer:
-#     """Class to analyze visualization data and calculate statistics with configurable thresholds."""
-    
-#     @staticmethod
-#     def set_color_thresholds(
-#         property_value: np.ndarray, 
-#         red_range: Optional[tuple] = None, 
-#         yellow_range: Optional[tuple] = None, 
-#         green_range: Optional[tuple] = None
-#     ) -> Dict[str, float]:
-#         """
-#         Set color thresholds based on input ranges or data distribution.
-        
-#         Args:
-#             property_value (np.ndarray): Input data array
-#             red_range (tuple, optional): Range for red category (min, max)
-#             yellow_range (tuple, optional): Range for yellow category (min, max)
-#             green_range (tuple, optional): Range for green category (min, max)
-        
-#         Returns:
-#             Dict with normalized thresholds for red, yellow, green
-#         """
-#         # Remove placeholder values
-#         valid_data = property_value[property_value != -1]
-        
-#         if len(valid_data) == 0:
-#             return {"red": 0, "yellow": 0.2, "green": 0.5}
-        
-#         # Determine data min and max
-#         data_min = np.min(valid_data)
-#         data_max = np.max(valid_data)
-        
-#         # Normalize ranges if provided, otherwise use default distribution
-#         def normalize_range(input_range):
-#             if input_range is None:
-#                 return None
-#             norm_min = (input_range[0] - data_min) / (data_max - data_min)
-#             norm_max = (input_range[1] - data_min) / (data_max - data_min)
-#             return (norm_min, norm_max)
-        
-#         norm_red_range = normalize_range(red_range)
-#         norm_yellow_range = normalize_range(yellow_range)
-#         norm_green_range = normalize_range(green_range)
-        
-#         # Default thresholds if not fully specified
-#         if norm_red_range is None:
-#             norm_red_range = (0, 0.2)
-#         if norm_yellow_range is None:
-#             norm_yellow_range = (0.2, 0.5)
-#         if norm_green_range is None:
-#             norm_green_range = (0.5, 1.0)
-        
-#         # Validate ranges
-#         # if not (0 <= norm_red_range[0] < norm_red_range[1] <= 
-#         #         norm_yellow_range[0] < norm_yellow_range[1] <= 
-#         #         norm_green_range[0] < norm_green_range[1] <= 1.0):
-#         #     raise ValueError("Invalid color ranges. Ensure ranges are in ascending order and within 0-1.")
-#         print(norm_red_range[0],":" , norm_red_range[1] ,":",
-#                 norm_yellow_range[0] ,":", norm_yellow_range[1] , ":",
-#                 norm_green_range[0] ,":" ,norm_green_range[1] )
-#         return {
-#             "red": norm_red_range[1],
-#             "yellow": norm_yellow_range[1],
-#             "green": 1
-#         }
-    
-#     @staticmethod
-#     def calculate_color_ratios(
-#         property_value: np.ndarray, 
-#         red_range: Optional[tuple] = None, 
-#         yellow_range: Optional[tuple] = None, 
-#         green_range: Optional[tuple] = None
-#     ) -> Dict[str, float]:
-#         """
-#         Calculate the ratio of green, yellow, and red areas with configurable thresholds.
-        
-#         Args:
-#             property_value (np.ndarray): Input data array
-#             red_range (tuple, optional): Range for red category
-#             yellow_range (tuple, optional): Range for yellow category
-#             green_range (tuple, optional): Range for green category
-        
-#         Returns:
-#             Dict with color ratios
-#         """
-#         # Remove placeholder values
-#         valid_data = property_value[property_value != -1]
-#         total_cells = len(valid_data)
-        
-#         if total_cells == 0:
-#             return {"red": 0, "yellow": 0, "green": 0}
-        
-#         # Get normalized thresholds
-#         thresholds = ResultAnalyzer.set_color_thresholds(
-#             property_value, red_range, yellow_range, green_range
-#         )
-        
-#         # Normalize the data between 0 and 1
-#         valid_min = np.min(valid_data)
-#         valid_max = np.max(valid_data)
-#         range_diff = valid_max - valid_min
-        
-#         if range_diff == 0:  # Handle case where all values are the same
-#             normalized = np.zeros_like(valid_data)
-#         else:
-#             normalized = (valid_data - valid_min) / range_diff
-        
-#         # Count cells in each color range
-#         red_count = np.sum(normalized < thresholds["red"])
-#         yellow_count = np.sum((normalized >= thresholds["red"]) & (normalized < thresholds["yellow"]))
-#         green_count = np.sum(normalized >= thresholds["yellow"])
-        
-#         # Calculate ratios
-#         ratios = {
-#             "red": red_count / total_cells,
-#             "yellow": yellow_count / total_cells,
-#             "green": green_count / total_cells
-#         }
-        
-#         return ratios
-    
-#     @staticmethod
-#     def find_red_areas(
-#         property_value: np.ndarray, 
-#         angle_matrix: np.ndarray, 
-#         red_range: Optional[tuple] = None
-#     ) -> List[Dict]:
-#         """
-#         Find locations of red areas with configurable red threshold.
-        
-#         Args:
-#             property_value (np.ndarray): Input data array
-#             angle_matrix (np.ndarray): Matrix of corresponding angles
-#             red_range (tuple, optional): Range defining red areas
-        
-#         Returns:
-#             List of dictionaries with red area details
-#         """
-#         rows, cols = property_value.shape
-        
-#         # Remove placeholder values
-#         valid_data = property_value.copy()
-#         valid_mask = valid_data != -1
-        
-#         if not np.any(valid_mask):
-#             return []
-        
-#         # Normalize the data between 0 and 1
-#         valid_min = np.min(valid_data[valid_mask])
-#         valid_max = np.max(valid_data[valid_mask])
-#         range_diff = valid_max - valid_min
-        
-#         if range_diff == 0:  # Handle case where all values are the same
-#             normalized = np.zeros_like(valid_data)
-#         else:
-#             normalized = np.zeros_like(valid_data)
-#             normalized[valid_mask] = (valid_data[valid_mask] - valid_min) / range_diff
-        
-#         # Get red threshold
-#         thresholds = ResultAnalyzer.set_color_thresholds(
-#             property_value, red_range=red_range
-#         )
-#         red_threshold = thresholds["red"]
-        
-#         # Find red areas
-#         red_areas = []
-#         for i in range(rows):
-#             for j in range(cols):
-#                 if valid_mask[i, j] < red_threshold:
-#                     red_areas.append({
-#                         "Row": i,
-#                         "Column": j,
-#                         "Angle": int(angle_matrix[i, j]),
-#                         "Value": property_value[i, j],
-#                         "Severity": "High" if normalized[i, j] < (red_threshold/2) else "Medium"
-#                     })
-        
-#         # Sort by severity and value
-#         red_areas.sort(key=lambda x: (0 if x["Severity"] == "High" else 1, x["Value"]))
-        
-#         return red_areas
+# Modern Styles Dictionary
+modern_style = {
+    "container": {
+        "width": "95%",
+        "maxWidth": "900px",  # Increased max width for larger screens
+        "margin": "20px auto",
+        "padding": "25px",      # Increased padding
+        "border": "0",         # Removed border
+        "borderRadius": "10px", # More rounded corners
+        "boxSizing": "border-box",
+        "backgroundColor": "white", # White background
+        "boxShadow": "0 4px 8px rgba(0,0,0,0.05)", # Softer shadow
+        "fontFamily": "Arial, sans-serif", # Modern font
+        "color": TEXT_COLOR,
+    },
+    "header": {
+        "textAlign": "center",
+        "fontSize": "24px",    # Larger header font
+        "fontWeight": "bold",
+        "marginBottom": "20px",
+        "color": DARK_GRAY,
+    },
+    "section_header": {
+        "fontSize": "20px",    # Slightly smaller section headers
+        "fontWeight": "bold",
+        "marginTop": "25px",
+        "marginBottom": "15px",
+        "color": DARK_GRAY,
+    },
+    "button": {
+        "backgroundColor": PRIMARY_COLOR,
+        "color": "white",
+        "border": "none",
+        "borderRadius": "8px",  # Rounded buttons
+        "padding": "10px 20px", # Increased button padding
+        "cursor": "pointer",
+        "fontSize": "16px",
+        "fontWeight": "600",
+        "marginLeft": "10px",
+        "boxShadow": "0 2px 4px rgba(0,0,0,0.05)", # Button shadow
+    },
+    "back_button": {
+        "backgroundColor": LIGHT_GRAY,
+        "color": DARK_GRAY,
+        "border": "1px solid #ddd", # Lighter border
+        "borderRadius": "8px",
+        "padding": "10px 20px",
+        "cursor": "pointer",
+        "fontSize": "16px",
+        "fontWeight": "600",
+        "boxShadow": "0 1px 2px rgba(0,0,0,0.05)",
+    },
+    "stats_section": {
+        "padding": "20px",
+        "border": "1px solid #eee", # Very light border
+        "borderRadius": "8px",
+        "backgroundColor": LIGHT_GRAY, # Light gray background for stats
+    },
+    "table_header": {
+        "backgroundColor": "#e9ecef", # Bootstrap light gray table header
+        "fontWeight": "bold",
+        "textAlign": "left",
+    },
+    "red_severity_row": {
+        "backgroundColor": "#ffe0e0", # Lighter red for severity
+        "color": DARK_GRAY,
+    },
+    "red_category_row": {
+        "backgroundColor": "#ffe0e0",
+        "color": DARK_GRAY,
+    },
+    "blue_category_row": {
+        "backgroundColor": "#e0e0ff", # Lighter blue
+        "color": DARK_GRAY,
+    },
+    "warning_alert": {
+        "display": "none",
+        "marginBottom": "15px",
+        "color": DARK_GRAY,
+        "backgroundColor": WARNING_COLOR, # Yellow warning background
+        "borderColor": WARNING_COLOR,
+        "borderRadius": "8px",
+        "padding": "10px 15px",
+    },
+    "color_distribution_bar_container": {
+        "width": "100%",
+        "overflow": "hidden",
+        "marginBottom": "15px",
+        "borderRadius": "8px", # Rounded bar container
+        "border": "1px solid #ddd", # Light border for the bar
+    },
+    "color_distribution_bar_red": {
+        "backgroundColor": DANGER_COLOR, # Use danger red for red zone
+        "height": "35px",           # Slightly taller bars
+        "float": "left",
+        "textAlign": "center",
+        "color": "white",
+        "lineHeight": "35px",       # Vertically center text in bar
+    },
+    "color_distribution_bar_blue": {
+        "backgroundColor": PRIMARY_COLOR, # Use primary blue for blue zone
+        "height": "35px",
+        "float": "left",
+        "textAlign": "center",
+        "color": "white",
+        "lineHeight": "35px",
+    },
+}
 
 
-# # Define the layout for the results page
-layout = html.Div([
-    html.Div([
-        html.H3("Results and Analysis", style={"text-align": "center", "font-size": "18px"}),
-        html.Div(
-            dcc.Link(
-                'Back to view',
-                href='/view',
-                style={
-                    "padding": "10px 20px",
-                    "fontSize": "18px",
-                    "backgroundColor": "#6a0dad",
-                    "color": "white",
-                    "border": "none",
-                    "cursor": "pointer",
-                    "borderRadius": "5px",
-                    "fontWeight": "bold",
-                    "boxShadow": "0 4px 6px rgba(0, 0, 0, 0.1)",
-                    "textDecoration": "none",
-                    "display": "inline-block"
-                }
-            ),
-            style={"marginTop": "20px"}
-        )
-    ], className="header"),
-    
-    html.Div([
-        html.Div([
-            html.Div([
-                html.H3("Thickness Statistics"),
-                html.Div(id='thickness-stats', className="p-3 border rounded")
-            ], className='col-md-6'),
-            
-            html.Div([
-                html.H3("Color Distribution"),
-                html.Div(id='color-distribution', className="p-3 border rounded")
-            ], className='col-md-6'),
-        ], className='row mb-4'),
-        
-        html.Div([
-            html.H3("Critical Areas (Red Zones)", className="text-center"),
-            dash_table.DataTable(
-                id='red-areas-table',
-                columns=[
-                    {'name': 'Row', 'id': 'Row'},
-                    {'name': 'Column', 'id': 'Column'},
-                    {'name': 'Angle (°)', 'id': 'Angle'},
-                    {'name': 'Thickness (mm)', 'id': 'Value', 'type': 'numeric', 'format': {'specifier': '.2f'}},
-                    {'name': 'Severity', 'id': 'Severity'}
-                ],
-                style_data_conditional=[
-                    {
-                        'if': {'filter_query': '{Severity} = "High"'},
-                        'backgroundColor': '#ffcccc',
-                        'color': 'black'
-                    },
-                    {
-                        'if': {'filter_query': '{Severity} = "Medium"'},
-                        'backgroundColor': '#ffffcc',
-                        'color': 'black'
-                    }
-                ],
-                style_header={
-                    'backgroundColor': 'rgb(230, 230, 230)',
-                    'fontWeight': 'bold'
-                },
-                page_size=10,
-                filter_action="native",
-                sort_action="native",
-                sort_mode="multi",
-                # export_format="csv",
-            )
-        ], className='row'),
-        
-        html.Div([
-            html.H3("Area Coverage Summary", className="text-center mt-4"),
-            dash_table.DataTable(
-                id='area-summary-table',
-                columns=[
-                    {'name': 'Color Category', 'id': 'category'},
-                    {'name': 'Coverage (%)', 'id': 'coverage', 'type': 'numeric', 'format': {'specifier': '.1%'}},
-                    {'name': 'Cell Count', 'id': 'count', 'type': 'numeric'},
-                    {'name': 'Average Thickness (mm)', 'id': 'avg_thickness', 'type': 'numeric', 'format': {'specifier': '.2f'}}
-                ],
-                style_data_conditional=[
-                    {
-                        'if': {'filter_query': '{category} = "Red"'},
-                        'backgroundColor': '#ffcccc',
-                        'color': 'black'
-                    },
-                    {
-                        'if': {'filter_query': '{category} = "Yellow"'},
-                        'backgroundColor': '#ffffcc',
-                        'color': 'black'
-                    },
-                    {
-                        'if': {'filter_query': '{category} = "Green"'},
-                        'backgroundColor': '#ccffcc',
-                        'color': 'black'
-                    }
-                ],
-                style_header={
-                    'backgroundColor': 'rgb(230, 230, 230)',
-                    'fontWeight': 'bold'
-                }
-            )
-        ], className='row mt-4'),
-    ], className="content"),
-],style={
-            "width": "95%",
-            "max-width": "750px",
-            "margin": "20px auto",
-            "padding": "15px",
-            "border": "1px solid #ccc",
-            "border-radius": "8px",
-            "box-sizing": "border-box",
-            "background-color": "#fefefe",
-            "box-shadow": "0 2px 5px rgba(0,0,0,0.1)",
-            '@media (max-width: 768px)': {
-                'width': '98%',
-                'padding': '10px',
-                'margin': '10px auto',
-            },
-            '@media (min-width: 769px)': {
-                'width': '75%',
-            }
-            })
+# Define the layout for the results page with modern styles
+layout = html.Div(
+    [
+        # ocation(id='url', refresh=True),  # **IMPORTANT: refresh=True**
+        html.Div(id="results-print-area",  # Added ID for printable area
+                 children=[
+                     html.Div([
+                         html.H3("Results and Analysis", style=modern_style["header"]),
+                         html.Div([
+                             dcc.Link(
+                                 html.Button(
+                                     "← Back to Input Form",
+                                     id="back-button",
+                                     style=modern_style["back_button"]
+                                 ),
+                                 href='/',
+                             ),
+                             dbc.Button(  # Added Print Button
+                                 "Print Results",
+                                 id="print-button",
+                                 style=modern_style["button"]
+                             ),
+                         ], style={"textAlign": "left", "display": "flex", "justify-content": "space-between"}),  # Adjusted style for button alignment
+                     ]),
+                     html.Div([
+                         html.Div([
+                             html.Div([
+                                 html.H3("Thickness Statistics", style=modern_style["section_header"]),
+                                 html.Div(id='thickness-stats', className="p-3", style=modern_style["stats_section"]) # Removed border and rounded from class, using style
+                             ], className='col-md-6'),
 
-# def register_callbacks(app):
-    
-#     # Data processing and analysis callbacks
-#     @app.callback(
-#         [Output('thickness-stats', 'children'),
-#          Output('color-distribution', 'children'),
-#          Output('red-areas-table', 'data'),
-#          Output('area-summary-table', 'data')],
-#         Input('prop-store', 'data')
-#     )
-#     def update_results(stored_data):
-#         if not stored_data:
-#             # Return empty results if no data
-#             empty_stats = html.Div("No data available")
-#             empty_distribution = html.Div("No data available")
-#             return empty_stats, empty_distribution, [], []
-        
-#         # Extract data from the store
-#         property_value = np.array(stored_data.get('property_value', []))
-        
-#         if property_value.size == 0:
-#             empty_stats = html.Div("No data available")
-#             empty_distribution = html.Div("No data available")
-#             return empty_stats, empty_distribution, [], []
-        
-#         rows, cols = property_value.shape
-        
-#         # Create angle matrix
-#         theta = np.linspace(0, 2 * np.pi, cols)
-#         z = np.linspace(0, rows, rows)
-#         theta_grid, z_grid = np.meshgrid(theta, z)
-#         angle_matrix = theta_grid * (180/np.pi)
-        
-#         # Calculate color ratios
-#         # color_ratios = ResultAnalyzer.calculate_color_ratios(property_value)
-#         color_ratios = ResultAnalyzer.calculate_color_ratios(
-#         property_value, 
-#         red_range=(13, 15),    # Red is from 13 to 15
-#         yellow_range=(15, 17), # Yellow is from 15 to 17
-#         green_range=(17, 20)   # Green is from 17 to 20
-#         )
-    
-        
-#         # Calculate thickness statistics
-#         valid_data = property_value[property_value != -1]
-#         valid_mask = property_value != -1
-#         normalized = np.zeros_like(property_value)
-        
-#         valid_min = np.min(valid_data)
-#         valid_max = np.max(valid_data)
-#         range_diff = valid_max - valid_min
-        
-#         if range_diff != 0:
-#             normalized[valid_mask] = (property_value[valid_mask] - valid_min) / range_diff
-        
-#         # Get data for each color category
-#         red_mask = (normalized < ResultAnalyzer.YELLOW_THRESHOLD) & valid_mask
-#         yellow_mask = (normalized >= ResultAnalyzer.YELLOW_THRESHOLD) & (normalized < ResultAnalyzer.GREEN_THRESHOLD) & valid_mask
-#         green_mask = (normalized >= ResultAnalyzer.GREEN_THRESHOLD) & valid_mask
-        
-#         red_count = np.sum(red_mask)
-#         yellow_count = np.sum(yellow_mask)
-#         green_count = np.sum(green_mask)
-#         total_count = red_count + yellow_count + green_count
-        
-#         # Calculate average thickness per category
-#         red_avg = np.mean(property_value[red_mask]) if red_count > 0 else 0
-#         yellow_avg = np.mean(property_value[yellow_mask]) if yellow_count > 0 else 0
-#         green_avg = np.mean(property_value[green_mask]) if green_count > 0 else 0
-        
-#         # Create thickness statistics table
-#         thickness_stats = html.Div([
-#             html.Table([
-#                 html.Thead(html.Tr([
-#                     html.Th("Statistic"),
-#                     html.Th("Value")
-#                 ])),
-#                 html.Tbody([
-#                     html.Tr([html.Td("Min Thickness:"), html.Td(f"{np.min(valid_data):.2f} mm")]),
-#                     html.Tr([html.Td("Max Thickness:"), html.Td(f"{np.max(valid_data):.2f} mm")]),
-#                     html.Tr([html.Td("Average Thickness:"), html.Td(f"{np.mean(valid_data):.2f} mm")]),
-#                     html.Tr([html.Td("Median Thickness:"), html.Td(f"{np.median(valid_data):.2f} mm")]),
-#                     html.Tr([html.Td("Standard Deviation:"), html.Td(f"{np.std(valid_data):.2f} mm")]),
-#                     html.Tr([html.Td("Total Cells:"), html.Td(f"{total_count}")]),
-#                 ])
-#             ], className="table table-striped")
-#         ])
-        
-#         # Create color distribution table
-#         color_distribution = html.Div([
-#             html.Div([
-#                 html.Div(style={"backgroundColor": "red", "width": f"{color_ratios['red']*100}%", "height": "30px", "float": "left", "textAlign": "center", "color": "white"}, children=f"{color_ratios['red']:.1%}"),
-#                 html.Div(style={"backgroundColor": "yellow", "width": f"{color_ratios['yellow']*100}%", "height": "30px", "float": "left", "textAlign": "center"}, children=f"{color_ratios['yellow']:.1%}"),
-#                 html.Div(style={"backgroundColor": "green", "width": f"{color_ratios['green']*100}%", "height": "30px", "float": "left", "textAlign": "center", "color": "white"}, children=f"{color_ratios['green']:.1%}"),
-#             ], style={"width": "100%", "overflow": "hidden", "marginBottom": "15px"}),
-#             html.Table([
-#                 html.Thead(html.Tr([
-#                     html.Th("Color Category"),
-#                     html.Th("Percentage"),
-#                     html.Th("Cell Count")
-#                 ])),
-#                 html.Tbody([
-#                     html.Tr([
-#                         html.Td("Red", style={"backgroundColor": "#ffcccc"}), 
-#                         html.Td(f"{color_ratios['red']:.1%}"),
-#                         html.Td(f"{red_count}")
-#                     ]),
-#                     html.Tr([
-#                         html.Td("Yellow", style={"backgroundColor": "#ffffcc"}), 
-#                         html.Td(f"{color_ratios['yellow']:.1%}"),
-#                         html.Td(f"{yellow_count}")
-#                     ]),
-#                     html.Tr([
-#                         html.Td("Green", style={"backgroundColor": "#ccffcc"}), 
-#                         html.Td(f"{color_ratios['green']:.1%}"),
-#                         html.Td(f"{green_count}")
-#                     ]),
-#                 ])
-#             ], className="table table-striped", )
-#         ])
-        
-#         # Find red areas for table
-#         red_areas = ResultAnalyzer.find_red_areas(property_value, angle_matrix)
-        
-#         # Create summary table data
-#         area_summary = [
-#             {"category": "Red", "coverage": color_ratios['red'], "count": red_count, "avg_thickness": red_avg},
-#             {"category": "Yellow", "coverage": color_ratios['yellow'], "count": yellow_count, "avg_thickness": yellow_avg},
-#             {"category": "Green", "coverage": color_ratios['green'], "count": green_count, "avg_thickness": green_avg},
-#             {"category": "Total", "coverage": 1.0, "count": total_count, "avg_thickness": np.mean(valid_data)}
-#         ]
-        
-#         return thickness_stats, color_distribution, red_areas, area_summary
+                             html.Div([
+                                 html.H3("Color Distribution", style=modern_style["section_header"]),
+                                 html.Div(id='color-distribution', className="p-3", style=modern_style["stats_section"]) # Removed border and rounded from class, using style
+                             ], className='col-md-6'),
+                         ], className='row mb-4'),
+
+                         html.Div([
+                             html.H3("Critical Areas (Red Zones)", className="text-center", style=modern_style["section_header"]),
+                             html.Div(id='threshold-warning', className="alert alert-warning", style=modern_style["warning_alert"]), # Using modern_style for warning
+                             dash_table.DataTable(
+                                 id='red-areas-table',
+                                 columns=[
+                                     {'name': 'Row', 'id': 'Row'},
+                                     {'name': 'Column', 'id': 'Column'},
+                                     {'name': 'Angle (°)', 'id': 'Angle'},
+                                     {'name': 'Thickness (mm)', 'id': 'Value', 'type': 'numeric', 'format': {'specifier': '.2f'}},
+                                     {'name': 'Severity', 'id': 'Severity'}
+                                 ],
+                                 style_data_conditional=[
+                                     {
+                                         'if': {'filter_query': '{Severity} = "High"'},
+                                         'style': modern_style["red_severity_row"], # Using modern style for red rows
+                                     }
+                                 ],
+                                 style_header=modern_style["table_header"], # Using modern style for table header
+                                 style_cell={'textAlign': 'left'}, # Default cell alignment left
+                                 page_size=10,
+                                 filter_action="native",
+                                 sort_action="native",
+                                 sort_mode="multi",
+                                #  className="table table-striped table-hover", # Bootstrap table classes
+                             )
+                         ], className='row'),
+
+                         html.Div([
+                             html.H3("Area Coverage Summary", className="text-center mt-4", style=modern_style["section_header"]),
+                             dash_table.DataTable(
+                                 id='area-summary-table',
+                                 columns=[
+                                     {'name': 'Color Category', 'id': 'category'},
+                                     {'name': 'Coverage (%)', 'id': 'coverage', 'type': 'numeric', 'format': {'specifier': '.1%'}},
+                                     {'name': 'Cell Count', 'id': 'count', 'type': 'numeric'},
+                                     {'name': 'Average Thickness (mm)', 'id': 'avg_thickness', 'type': 'numeric', 'format': {'specifier': '.2f'}}
+                                 ],
+                                 style_data_conditional=[
+                                     {
+                                         'if': {'filter_query': '{category} = "Red"'},
+                                         'style': modern_style["red_category_row"], # Using modern style for red category
+                                     },
+                                     {
+                                         'if': {'filter_query': '{category} = "Blue"'},
+                                         'style': modern_style["blue_category_row"], # Using modern style for blue category
+                                     }
+                                 ],
+                                 style_header=modern_style["table_header"], # Using modern style for table header
+                                 style_cell={'textAlign': 'left'},
+                                #  className="table table-striped table-hover", # Bootstrap table classes
+                             )
+                         ], className='row mt-4'),
+                     ], className="content"),
+                 ], style=modern_style["container"]), # Apply modern container style
+        html.Div(id="dummy-print-output", style={'display': 'none'})  # Dummy output for clientside callback
+    ]
+)
 
 
 class ResultAnalyzer:
     """Class to analyze visualization data and calculate statistics with configurable thresholds."""
-    
+
     @staticmethod
     def calculate_color_zones(
-        property_value: np.ndarray, 
-        nominal_thickness: float,
-        design_thickness: float,
-        threshold_thickness: float
+            property_value: np.ndarray,
+            thickness: float,
+            threshold_percentage: float
     ) -> Dict[str, np.ndarray]:
         """
-        Calculate color zones based on thickness thresholds.
-        
+        Calculate binary color zones based on threshold percentage of max thickness.
+
         Args:
             property_value (np.ndarray): Input thickness data array
-            nominal_thickness (float): Target nominal thickness (green threshold)
-            design_thickness (float): Minimum design thickness (yellow threshold)
-        
+            thickness (float): Maximum thickness value
+            threshold_percentage (float): Percentage threshold for red/blue distinction
+
         Returns:
-            Dict with masks for red, yellow, and green zones
+            Dict with masks for red and blue zones, warning message if threshold exceeds max
         """
         # Remove placeholder values
         valid_mask = property_value != -1
-        
-        # Define color zones based on absolute thickness values
-        green_mask = (property_value >= nominal_thickness) & valid_mask
-        yellow_mask = (property_value >= threshold_thickness) & (property_value < nominal_thickness) & valid_mask
-        red_mask = (property_value < threshold_thickness) & valid_mask
-        
+        valid_data = property_value[valid_mask]
+
+        # Calculate threshold value
+        threshold_value = thickness * (threshold_percentage / 100.0)
+
+        # Warning message if threshold exceeds max value
+        warning_message = ""
+        data_max = np.max(valid_data) if len(valid_data) > 0 else 0
+
+        if threshold_value > data_max:
+            warning_message = f"Warning: Calculated threshold value ({threshold_value:.2f}) exceeds maximum data value ({data_max:.2f}). Threshold has been adjusted to maximum value."
+            threshold_value = data_max
+
+        # Define binary color zones based on threshold
+        red_mask = (property_value <= threshold_value) & valid_mask
+        blue_mask = (property_value > threshold_value) & valid_mask
+
         return {
             "red": red_mask,
-            "yellow": yellow_mask,
-            "green": green_mask,
-            "valid": valid_mask
+            "blue": blue_mask,
+            "valid": valid_mask,
+            "warning": warning_message,
+            "adjusted_threshold": threshold_value
         }
-    
+
     @staticmethod
     def calculate_color_ratios(
-        property_value: np.ndarray, 
-        nominal_thickness: float,
-        design_thickness: float,
-        threshold_thickness :float
+            property_value: np.ndarray,
+            thickness: float,
+            threshold_percentage: float
     ) -> Dict[str, float]:
         """
-        Calculate the ratio of green, yellow, and red areas based on thickness thresholds.
-        
+        Calculate the ratio of red and blue areas based on threshold.
+
         Args:
             property_value (np.ndarray): Input thickness data array
-            nominal_thickness (float): Target nominal thickness (green threshold)
-            design_thickness (float): Minimum design thickness (yellow threshold)
-        
+            thickness (float): Maximum thickness value
+            threshold_percentage (float): Percentage threshold for red/blue distinction
+
         Returns:
-            Dict with color ratios
+            Dict with color ratios and warning if applicable
         """
         # Get color zone masks
         zones = ResultAnalyzer.calculate_color_zones(
-            property_value, nominal_thickness, design_thickness,  threshold_thickness
+            property_value, thickness, threshold_percentage
         )
-        
+
         # Count cells in each zone
         total_valid_cells = np.sum(zones["valid"])
-        
+
         if total_valid_cells == 0:
-            return {"red": 0, "yellow": 0, "green": 0}
-        
+            return {"red": 0, "blue": 0, "warning": zones["warning"], "adjusted_threshold": zones["adjusted_threshold"]}
+
         # Calculate ratios
         ratios = {
             "red": np.sum(zones["red"]) / total_valid_cells,
-            "yellow": np.sum(zones["yellow"]) / total_valid_cells,
-            "green": np.sum(zones["green"]) / total_valid_cells
+            "blue": np.sum(zones["blue"]) / total_valid_cells,
+            "warning": zones["warning"],
+            "adjusted_threshold": zones["adjusted_threshold"]
         }
-        
+
         return ratios
-    
+
     @staticmethod
     def find_red_areas(
-        property_value: np.ndarray, 
-        angle_matrix: np.ndarray, 
-        nominal_thickness: float,
-        design_thickness: float,
-        threshold_thickness: float
-    ) -> List[Dict]:
+            property_value: np.ndarray,
+            angle_matrix: np.ndarray,
+            thickness: float,
+            threshold_percentage: float
+    ) -> Tuple[List[Dict], str, float]:
         """
-        Find locations of red areas (below design thickness).
-        
+        Find locations of red areas (below threshold).
+
         Args:
             property_value (np.ndarray): Input thickness data array
             angle_matrix (np.ndarray): Matrix of corresponding angles
-            threshold_thickness (float): Minimum design thickness threshold
-        
+            thickness (float): Maximum thickness value
+            threshold_percentage (float): Percentage threshold for red/blue distinction
+
         Returns:
-            List of dictionaries with red area details
+            Tuple of (list of dictionaries with red area details, warning message, adjusted threshold)
         """
         rows, cols = property_value.shape
-        
-        # Define red mask - below design thickness
-        valid_mask = property_value != -1
-        red_mask = (property_value < threshold_thickness) & valid_mask
-        
+
+        # Get zones including warning message if threshold is adjusted
+        zones = ResultAnalyzer.calculate_color_zones(
+            property_value, thickness, threshold_percentage
+        )
+
+        red_mask = zones["red"]
+        warning_message = zones["warning"]
+        adjusted_threshold = zones["adjusted_threshold"]
+
         if not np.any(red_mask):
-            return []
-        
+            return [], warning_message, adjusted_threshold
+
         # Find red areas
         red_areas = []
         for i in range(rows):
             for j in range(cols):
                 if red_mask[i, j]:
-                    # Calculate severity based on how far below design thickness
-                    # severity_ratio = property_value[i, j] / threshold_thickness if threshold_thickness > 0 else 0
-                    if property_value[i, j] <= threshold_thickness:
-                        severity = "High"
+                    # All red areas are high severity in binary scheme
+                    severity = "High"
 
-                    
-                        red_areas.append({
-                            "Row": i,
-                            "Column": j,
-                            "Angle": int(angle_matrix[i, j]),
-                            "Value": property_value[i, j],
-                            "Severity": severity
-                        })
-        
-        # Sort by severity and value
-        red_areas.sort(key=lambda x: (0 if x["Severity"] == "High" else 1, x["Value"]))
-        
-        return red_areas
+                    red_areas.append({
+                        "Row": i,
+                        "Column": j,
+                        "Angle": int(angle_matrix[i, j]),
+                        "Value": property_value[i, j],
+                        "Severity": severity
+                    })
+
+        # Sort by value (lowest thickness first)
+        red_areas.sort(key=lambda x: x["Value"])
+
+        return red_areas, warning_message, adjusted_threshold
+
 
 def register_callbacks(app):
-    
     # Data processing and analysis callbacks
     @app.callback(
         [Output('thickness-stats', 'children'),
          Output('color-distribution', 'children'),
          Output('red-areas-table', 'data'),
-         Output('area-summary-table', 'data')],
-        Input('prop-store', 'data')
+         Output('area-summary-table', 'data'),
+         Output('threshold-warning', 'children'),
+         Output('threshold-warning', 'style')],
+        [Input('prop-store', 'data'),       
+         Input('data-store','data')],   
+        prevent_initial_call=False
     )
-    def update_results(stored_data):
-        if not stored_data:
+    def update_results(stored_data, info_data):
+        if not stored_data or info_data:
             # Return empty results if no data
             empty_stats = html.Div("No data available")
             empty_distribution = html.Div("No data available")
-            return empty_stats, empty_distribution, [], []
-        nominal_thickness = stored_data["NT"]
-        design_thickness = stored_data["DT"]
-        threshold_thickness = stored_data["TT"]
-        # Default thresholds if not provided
-        if nominal_thickness is None:
-            nominal_thickness = 18.0  # Example nominal thickness
-        if design_thickness is None:
-            design_thickness = 15.0  # Example design thickness
+            return empty_stats, empty_distribution, [], [], "", {'display': 'none'}
         
+        # Accessing the data using the info_data dictionary
+        report_no = info_data["report_no"]
+        client_name = info_data["client_name"]
+        address = info_data["address"]
+        date = info_data["date"]
+        po_number = info_data["po_number"]
+        date_inspection = info_data["date_inspection"]
+
+        # Equipment details
+        make = info_data["make"]
+        model = info_data["model"]
+        sr_no = info_data["sr_no"]
+        calibration_due_date = info_data["calibration_due_date"]
+
+        # Part details
+        part_name = info_data["part_name"]
+        material = info_data["material"]
+        drawing_number = info_data["drawing_number"]
+
+        # Example usage:  Print some of the values
+        print(f"Report Number: {report_no}")
+        print(f"Client Name: {client_name}")
+        print(f"Part Name: {part_name}")
+        print(f"Equipment Serial Number: {sr_no}")
+        # Extract parameters from stored data
+        thickness = stored_data.get("T")
+        threshold_percentage = stored_data.get("TT")
+        print(thickness, threshold_percentage)
         # Extract data from the store
         property_value = np.array(stored_data.get('property_value', []))
-        
+
         if property_value.size == 0:
             empty_stats = html.Div("No data available")
             empty_distribution = html.Div("No data available")
-            return empty_stats, empty_distribution, [], []
-        
+            return empty_stats, empty_distribution, [], [], "", {'display': 'none'}
+
         rows, cols = property_value.shape
-        
+
         # Create angle matrix
         theta = np.linspace(0, 2 * np.pi, cols)
         z = np.linspace(0, rows, rows)
         theta_grid, z_grid = np.meshgrid(theta, z)
-        angle_matrix = theta_grid * (180/np.pi)
-        
+        angle_matrix = theta_grid * (180 / np.pi)
+
         # Calculate color zones and ratios
-        zones = ResultAnalyzer.calculate_color_zones(
-            property_value, nominal_thickness, design_thickness, threshold_thickness
-        )
         color_ratios = ResultAnalyzer.calculate_color_ratios(
-            property_value, nominal_thickness, design_thickness, threshold_thickness
+            property_value, thickness, threshold_percentage
         )
-        
+
+        zones = ResultAnalyzer.calculate_color_zones(
+            property_value, thickness, threshold_percentage
+        )
+
         # Get valid data
         valid_data = property_value[zones["valid"]]
-        
+
+        # Get the adjusted threshold and warning message
+        adjusted_threshold = color_ratios["adjusted_threshold"]
+        warning_message = color_ratios["warning"]
+
         # Count cells in each color category
         red_count = np.sum(zones["red"])
-        yellow_count = np.sum(zones["yellow"])
-        green_count = np.sum(zones["green"])
-        total_count = red_count + yellow_count + green_count
-        
+        blue_count = np.sum(zones["blue"])
+        total_count = red_count + blue_count
+
         # Calculate average thickness per category
         red_avg = np.mean(property_value[zones["red"]]) if red_count > 0 else 0
-        yellow_avg = np.mean(property_value[zones["yellow"]]) if yellow_count > 0 else 0
-        green_avg = np.mean(property_value[zones["green"]]) if green_count > 0 else 0
-        
+        blue_avg = np.mean(property_value[zones["blue"]]) if blue_count > 0 else 0
+
+
         # Create thickness statistics table
         thickness_stats = html.Div([
             html.Table([
                 html.Thead(html.Tr([
-                    html.Th("Statistic"),
-                    html.Th("Value")
+                    html.Th("Statistic", style=modern_style["table_header"]),
+                    html.Th("Value", style=modern_style["table_header"])
                 ])),
                 html.Tbody([
-                    html.Tr([html.Td("Nominal Thickness:"), html.Td(f"{nominal_thickness:.2f} mm")]),
-                    html.Tr([html.Td("Design Thickness:"), html.Td(f"{design_thickness:.2f} mm")]),
+                    html.Tr([html.Td("Max Thickness:"), html.Td(f"{thickness:.2f} mm")]),
+                    html.Tr([html.Td("Threshold Percentage:"), html.Td(f"{threshold_percentage:.1f}%")]),
+                    html.Tr([html.Td("Threshold Value:"), html.Td(f"{adjusted_threshold:.2f} mm")]),
                     html.Tr([html.Td("Min Thickness:"), html.Td(f"{np.min(valid_data):.2f} mm")]),
                     html.Tr([html.Td("Max Thickness:"), html.Td(f"{np.max(valid_data):.2f} mm")]),
                     html.Tr([html.Td("Average Thickness:"), html.Td(f"{np.mean(valid_data):.2f} mm")]),
@@ -664,55 +472,74 @@ def register_callbacks(app):
                     html.Tr([html.Td("Standard Deviation:"), html.Td(f"{np.std(valid_data):.2f} mm")]),
                     html.Tr([html.Td("Total Cells:"), html.Td(f"{total_count}")]),
                 ])
-            ], className="table table-striped")
+            ], className="table table-borderless") # Removed striped, added borderless for cleaner look
         ])
-        
-        # Create color distribution table
+
+        # Create color distribution table with binary scheme
         color_distribution = html.Div([
             html.Div([
-                html.Div(style={"backgroundColor": "red", "width": f"{color_ratios['red']*100}%", "height": "30px", "float": "left", "textAlign": "center", "color": "white"}, children=f"{color_ratios['red']:.1%}"),
-                html.Div(style={"backgroundColor": "yellow", "width": f"{color_ratios['yellow']*100}%", "height": "30px", "float": "left", "textAlign": "center"}, children=f"{color_ratios['yellow']:.1%}"),
-                html.Div(style={"backgroundColor": "green", "width": f"{color_ratios['green']*100}%", "height": "30px", "float": "left", "textAlign": "center", "color": "white"}, children=f"{color_ratios['green']:.1%}"),
-            ], style={"width": "100%", "overflow": "hidden", "marginBottom": "15px"}),
+                html.Div(style={**modern_style["color_distribution_bar_red"], "width": f"{color_ratios['red'] * 100}%"}, children=f"{color_ratios['red']:.1%}"), # Using spread operator to merge styles
+                html.Div(style={**modern_style["color_distribution_bar_blue"], "width": f"{color_ratios['blue'] * 100}%"}, children=f"{color_ratios['blue']:.1%}"), # Using spread operator to merge styles
+            ], style=modern_style["color_distribution_bar_container"]), # Applying container style
             html.Table([
                 html.Thead(html.Tr([
-                    html.Th("Color Category"),
-                    html.Th("Threshold"),
-                    html.Th("Percentage"),
-                    html.Th("Cell Count")
+                    html.Th("Color Category", style=modern_style["table_header"]),
+                    html.Th("Threshold", style=modern_style["table_header"]),
+                    html.Th("Percentage", style=modern_style["table_header"]),
+                    html.Th("Cell Count", style=modern_style["table_header"])
                 ])),
                 html.Tbody([
                     html.Tr([
-                        html.Td("Red", style={"backgroundColor": "#ffcccc"}), 
-                        html.Td(f"< {threshold_thickness:.2f} mm"),
+                        html.Td("Red", style=modern_style["red_category_row"]), # Applying row style
+                        html.Td(f"< {adjusted_threshold:.2f} mm"),
                         html.Td(f"{color_ratios['red']:.1%}"),
                         html.Td(f"{red_count}")
                     ]),
                     html.Tr([
-                        html.Td("Yellow", style={"backgroundColor": "#ffffcc"}), 
-                        html.Td(f"{threshold_thickness:.2f} - {nominal_thickness:.2f} mm"),
-                        html.Td(f"{color_ratios['yellow']:.1%}"),
-                        html.Td(f"{yellow_count}")
-                    ]),
-                    html.Tr([
-                        html.Td("Green", style={"backgroundColor": "#ccffcc"}), 
-                        html.Td(f"≥ {nominal_thickness:.2f} mm"),
-                        html.Td(f"{color_ratios['green']:.1%}"),
-                        html.Td(f"{green_count}")
+                        html.Td("Blue", style=modern_style["blue_category_row"]), # Applying row style
+                        html.Td(f"≥ {adjusted_threshold:.2f} mm"),
+                        html.Td(f"{color_ratios['blue']:.1%}"),
+                        html.Td(f"{blue_count}")
                     ]),
                 ])
-            ], className="table table-striped", )
+            ], className="table table-borderless") # Removed striped, added borderless for cleaner look
         ])
-        
+
         # Find red areas for table
-        red_areas = ResultAnalyzer.find_red_areas(property_value, angle_matrix, nominal_thickness, design_thickness,threshold_thickness)
-        
-        # Create summary table data
+        red_areas, warning_msg, adjusted_threshold = ResultAnalyzer.find_red_areas(
+            property_value, angle_matrix, thickness, threshold_percentage
+        )
+
+        # Create summary table data with binary scheme
         area_summary = [
             {"category": "Red", "coverage": color_ratios['red'], "count": red_count, "avg_thickness": red_avg},
-            {"category": "Yellow", "coverage": color_ratios['yellow'], "count": yellow_count, "avg_thickness": yellow_avg},
-            {"category": "Green", "coverage": color_ratios['green'], "count": green_count, "avg_thickness": green_avg},
+            {"category": "Blue", "coverage": color_ratios['blue'], "count": blue_count, "avg_thickness": blue_avg},
             {"category": "Total", "coverage": 1.0, "count": total_count, "avg_thickness": np.mean(valid_data)}
         ]
-        
-        return thickness_stats, color_distribution, red_areas, area_summary
+
+        # Set warning message display style
+        warning_style = {'display': 'block', **modern_style["warning_alert"]} if warning_message else {'display': 'none'} # Using spread operator to merge styles
+
+        return thickness_stats, color_distribution, red_areas, area_summary, warning_message, warning_style
+
+    app.clientside_callback(
+        """
+        function(n_clicks) {
+            if (n_clicks > 0) {
+                var printContents = document.getElementById('results-print-area').innerHTML;
+                var originalContents = document.body.innerHTML;
+
+                document.body.innerHTML = printContents;
+
+                window.print();
+
+                document.body.innerHTML = originalContents;
+                //window.location.reload(); // Optional: Reload page after print - can be commented out if not needed
+                return 'printed'; // Return a value to trigger output (dummy-print-output)
+            }
+            return ''; // Return empty string if button not clicked
+        }
+        """,
+        Output("dummy-print-output", "children"),
+        Input("print-button", "n_clicks"),
+    )
