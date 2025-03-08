@@ -26,7 +26,7 @@ layout = html.Div([
 
             html.Div([
                 UIComponents.create_input_field("PO NUMBER", "po-number"),
-                UIComponents.create_input_field("DATE OF INSPECTION", "date-inspection"),
+                UIComponents.create_date_picker("DATE OF INSPECTION", "date-inspection"),
             ], style={"margin-bottom": "12px"}),
 
             html.Div([
@@ -154,7 +154,7 @@ def register_callbacks(app):
          Output("address", "value"),
          Output("date", "date"),
          Output("po-number", "value"),
-         Output("date-inspection", "value"),
+         Output("date-inspection", "date"),
          Output("make", "value"),
          Output("model", "value"),
          Output("sr-no", "value"),

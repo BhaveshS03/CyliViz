@@ -85,5 +85,5 @@ def run_standalone(app_manager):
     standalone_runner.run()
 
 if __name__ == '__main__':
-    #run_standalone(app)
-    app.run_server(debug=True)
+    run_standalone(app)
+    # app.run_server(debug=True)

@@ -450,29 +450,6 @@ def register_callbacks(app):
         red_avg = np.mean(property_value[zones["red"]]) if red_count > 0 else 0
         blue_avg = np.mean(property_value[zones["blue"]]) if blue_count > 0 else 0
 
-
-        # # Create thickness statistics table
-        # thickness_stats = html.Div([
-        #     html.Table([
-        #         html.Thead(html.Tr([
-        #             html.Th("Statistic", style=modern_style["table_header"]),
-        #             html.Th("Value", style=modern_style["table_header"])
-        #         ])),
-        #         html.Tbody([
-        #             html.Tr([html.Td("Max Thickness:"), html.Td(f"{thickness:.2f} mm")]),
-        #             html.Tr([html.Td("Threshold Percentage:"), html.Td(f"{threshold_percentage:.1f}%")]),
-        #             html.Tr([html.Td("Threshold Value:"), html.Td(f"{adjusted_threshold:.2f} mm")]),
-        #             html.Tr([html.Td("Min Thickness:"), html.Td(f"{np.min(valid_data):.2f} mm")]),
-        #             html.Tr([html.Td("Max Thickness:"), html.Td(f"{np.max(valid_data):.2f} mm")]),
-        #             html.Tr([html.Td("Average Thickness:"), html.Td(f"{np.mean(valid_data):.2f} mm")]),
-        #             html.Tr([html.Td("Median Thickness:"), html.Td(f"{np.median(valid_data):.2f} mm")]),
-        #             html.Tr([html.Td("Standard Deviation:"), html.Td(f"{np.std(valid_data):.2f} mm")]),
-        #             html.Tr([html.Td("Total Cells:"), html.Td(f"{total_count}")]),
-        #         ])
-        #     ], className="table table-borderless") # Removed striped, added borderless for cleaner look
-        # ])
-
-
         thickness_stats = html.Div([
             html.Table([
                 html.Thead(html.Tr([
