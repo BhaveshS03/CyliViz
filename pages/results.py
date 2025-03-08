@@ -378,7 +378,8 @@ def register_callbacks(app):
         prevent_initial_call=False
     )
     def update_results(stored_data, info_data):
-        if not stored_data or info_data:
+        print(stored_data, info_data)
+        if not stored_data or not   info_data:
             # Return empty results if no data
             empty_stats = html.Div("No data available")
             empty_distribution = html.Div("No data available")
@@ -403,11 +404,7 @@ def register_callbacks(app):
         material = info_data["material"]
         drawing_number = info_data["drawing_number"]
 
-        # Example usage:  Print some of the values
-        print(f"Report Number: {report_no}")
-        print(f"Client Name: {client_name}")
-        print(f"Part Name: {part_name}")
-        print(f"Equipment Serial Number: {sr_no}")
+
         # Extract parameters from stored data
         thickness = stored_data.get("T")
         threshold_percentage = stored_data.get("TT")
@@ -454,15 +451,60 @@ def register_callbacks(app):
         blue_avg = np.mean(property_value[zones["blue"]]) if blue_count > 0 else 0
 
 
-        # Create thickness statistics table
+        # # Create thickness statistics table
+        # thickness_stats = html.Div([
+        #     html.Table([
+        #         html.Thead(html.Tr([
+        #             html.Th("Statistic", style=modern_style["table_header"]),
+        #             html.Th("Value", style=modern_style["table_header"])
+        #         ])),
+        #         html.Tbody([
+        #             html.Tr([html.Td("Max Thickness:"), html.Td(f"{thickness:.2f} mm")]),
+        #             html.Tr([html.Td("Threshold Percentage:"), html.Td(f"{threshold_percentage:.1f}%")]),
+        #             html.Tr([html.Td("Threshold Value:"), html.Td(f"{adjusted_threshold:.2f} mm")]),
+        #             html.Tr([html.Td("Min Thickness:"), html.Td(f"{np.min(valid_data):.2f} mm")]),
+        #             html.Tr([html.Td("Max Thickness:"), html.Td(f"{np.max(valid_data):.2f} mm")]),
+        #             html.Tr([html.Td("Average Thickness:"), html.Td(f"{np.mean(valid_data):.2f} mm")]),
+        #             html.Tr([html.Td("Median Thickness:"), html.Td(f"{np.median(valid_data):.2f} mm")]),
+        #             html.Tr([html.Td("Standard Deviation:"), html.Td(f"{np.std(valid_data):.2f} mm")]),
+        #             html.Tr([html.Td("Total Cells:"), html.Td(f"{total_count}")]),
+        #         ])
+        #     ], className="table table-borderless") # Removed striped, added borderless for cleaner look
+        # ])
+
+
         thickness_stats = html.Div([
             html.Table([
                 html.Thead(html.Tr([
-                    html.Th("Statistic", style=modern_style["table_header"]),
-                    html.Th("Value", style=modern_style["table_header"])
+                    html.Th("Category", style=modern_style["table_header"]),
+                    html.Th("Details", style=modern_style["table_header"])
                 ])),
                 html.Tbody([
-                    html.Tr([html.Td("Max Thickness:"), html.Td(f"{thickness:.2f} mm")]),
+                    # Report Information
+                    html.Tr([html.Td("Report No:"), html.Td(report_no)]),
+                    html.Tr([html.Td("Client Name:"), html.Td(client_name)]),
+                    html.Tr([html.Td("Address:"), html.Td(address)]),
+                    html.Tr([html.Td("Date:"), html.Td(date)]),
+                    html.Tr([html.Td("PO Number:"), html.Td(po_number)]),
+                    html.Tr([html.Td("Date Inspection:"), html.Td(date_inspection)]),
+                    html.Tr([html.Td(html.Hr(), colSpan="2")]), # Separator line
+
+                    # Equipment Details
+                    html.Tr([html.Td("Equipment Make:"), html.Td(make)]),
+                    html.Tr([html.Td("Equipment Model:"), html.Td(model)]),
+                    html.Tr([html.Td("Equipment SR. No:"), html.Td(sr_no)]),
+                    html.Tr([html.Td("Calibration Due Date:"), html.Td(calibration_due_date)]),
+                    html.Tr([html.Td(html.Hr(), colSpan="2")]),  # Separator line
+
+                    # Part Details
+                    html.Tr([html.Td("Part Name:"), html.Td(part_name)]),
+                    html.Tr([html.Td("Material:"), html.Td(material)]),
+                    html.Tr([html.Td("Drawing Number:"), html.Td(drawing_number)]),
+                    html.Tr([html.Td(html.Hr(), colSpan="2")]),  # Separator line
+
+                    # Thickness Statistics - Sub-table structure embedded
+                    html.Tr([html.Td("Thickness Statistics", style=modern_style["table_header"]), html.Td("")]), # Header for this section
+                    html.Tr([html.Td("Nominal Thickness:"), html.Td(f"{thickness:.2f} mm")]),
                     html.Tr([html.Td("Threshold Percentage:"), html.Td(f"{threshold_percentage:.1f}%")]),
                     html.Tr([html.Td("Threshold Value:"), html.Td(f"{adjusted_threshold:.2f} mm")]),
                     html.Tr([html.Td("Min Thickness:"), html.Td(f"{np.min(valid_data):.2f} mm")]),
@@ -472,7 +514,7 @@ def register_callbacks(app):
                     html.Tr([html.Td("Standard Deviation:"), html.Td(f"{np.std(valid_data):.2f} mm")]),
                     html.Tr([html.Td("Total Cells:"), html.Td(f"{total_count}")]),
                 ])
-            ], className="table table-borderless") # Removed striped, added borderless for cleaner look
+            ], className="table table-borderless")
         ])
 
         # Create color distribution table with binary scheme
