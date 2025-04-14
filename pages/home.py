@@ -1,6 +1,6 @@
 from dash import html, Output, Input, callback, dcc, State
 from components.UIComponents import UIComponents
-
+MEASUREMENT_UNIT = "mm"
 """Create the main application layout."""
 layout = html.Div([
         html.H1(
@@ -51,16 +51,31 @@ layout = html.Div([
             ], style={"margin-bottom": "8px"}),
 
             html.Div([
-                html.H6("DIMENSIONS", style={"font-weight": "bold", "margin-bottom": "5px", "font-size": "12px"})
+                html.H6("DIMENSIONS in:", style={"font-weight": "bold", "margin-bottom": "5px", "font-size": "12px"})
             ]),
 
+            # Unit Toggle (mm/in) added here
             html.Div([
-                UIComponents.create_input_field("Outer Diameter", "input-OuterDia"),
+                html.Label("Unit of Measurement:", style={"font-weight": "bold", "margin-right": "10px"}),
+                dcc.RadioItems(
+                    id='unit-toggle',
+                    options=[
+                        {'label': 'Millimeters (mm)', 'value': 'mm'},
+                        {'label': 'Inches (in)', 'value': 'in'}
+                    ],
+                    value='mm',  # Default to millimeters
+                    inline=True,
+                    style={"margin-bottom": "10px"}
+                )
+            ], style={"margin-bottom": "10px"}),
+
+            html.Div([
+                UIComponents.create_input_field(f"Outer Diameter", "input-OuterDia"),
                 UIComponents.create_input_field("Test Area","input-TestArea"),
-                UIComponents.create_input_field("Height", "input-Height"),
-                UIComponents.create_input_field("Total Height", "input-TotalHeight"),
-                UIComponents.create_input_field("NOMINAL THICKNESS", "nominal-thickness"),
-                UIComponents.create_input_field("DESIGN THICKNESS", "design-thickness"),
+                UIComponents.create_input_field("Cylinder Measure Height", "input-Height"),
+                UIComponents.create_input_field("Total Cylinder Height", "input-TotalHeight"),
+                UIComponents.create_input_field("NOMINAL THICKNESS of Cylinder", "nominal-thickness"),
+                UIComponents.create_input_field("DESIGN THICKNESS of Cylinder", "design-thickness"),
             ], style={"margin-bottom": "10px"}),
 
             html.Div([
@@ -71,9 +86,9 @@ layout = html.Div([
                 dcc.RadioItems(
                     id='threshold-type-toggle',
                     options=[
-                        {'label': 'Nominal Thickness (%)', 'value': 'nominal'},
-                        {'label': 'Design Thickness (%)', 'value': 'design'},
-                        {'label': 'Relative to Minimum Thickness (%)', 'value': 'custom'}
+                        {'label': 'Nominal Thickness', 'value': 'nominal'},
+                        {'label': 'Design Thickness', 'value': 'design'},
+                        {'label': 'Relative to Maximum Thickness', 'value': 'custom'}
                     ],
                     value='nominal',  # Default value
                     inline=True # Display options in a line
@@ -81,7 +96,7 @@ layout = html.Div([
             ], style={"margin-bottom": "8px"}),
 
             html.Div([
-                UIComponents.create_input_field("THRESHOLD Value", "threshold-thickness"),
+                UIComponents.create_input_field("THRESHOLD Thickness of Cylinder (Denotes 0% in graph)", "threshold-thickness"),
             ], style={"margin-bottom": "10px"}),
 
 
@@ -147,7 +162,6 @@ layout = html.Div([
         })
 
 def register_callbacks(app):
-    # New callback to populate form fields with stored data
     @callback(
         [Output("report-no", "value"),
          Output("client-name", "value"),
@@ -162,6 +176,7 @@ def register_callbacks(app):
          Output("part-name", "value"),
          Output("material", "value"),
          Output("drawing-number", "value"),
+         Output("unit-toggle", "value"),  # Added unit toggle output
          Output("input-OuterDia", "value"),
          Output("input-TestArea", "value"),
          Output("input-Height", "value"),
@@ -192,6 +207,7 @@ def register_callbacks(app):
             "part_name": "",
             "material": "",
             "drawing_number": "",
+            "unit": MEASUREMENT_UNIT,  # Default unit is mm
             "OD": "", 
             "TA": "",
             "HE": "",
@@ -212,6 +228,7 @@ def register_callbacks(app):
                 "", "", "", None, "", "", 
                 "", "", "", None, 
                 "", "", "", 
+                MEASUREMENT_UNIT,  # Default unit value
                 "", "", "", "", "", "", "", "nominal",
                 status_message, button_style
             )
@@ -266,6 +283,7 @@ def register_callbacks(app):
             data["part_name"],
             data["material"],
             data["drawing_number"],
+            data["unit"],  # Return unit value
             data["OD"],
             data["TA"],
             data["HE"],
@@ -296,6 +314,7 @@ def register_callbacks(app):
      Input("part-name", "value"),
      Input("material", "value"),
      Input("drawing-number", "value"),
+     Input("unit-toggle", "value"),  # Added unit toggle input
      Input("input-OuterDia", "value"), 
      Input("input-TestArea", "value"), 
      Input("input-Height", "value"), 
@@ -307,8 +326,8 @@ def register_callbacks(app):
     prevent_initial_call=True)
     def update_store(report_no, client_name, address, date, po_number, date_inspection,
                     make, model, sr_no, calibration_due_date, part_name, material, drawing_number,
-                    outer_dia, test_area, height, total_height, nominal_thickness, design_thickness, 
-                    threshold_percentage, threshold_type):
+                    unit, outer_dia, test_area, height, total_height, nominal_thickness, design_thickness, 
+                    thickness_threshold, threshold_type):
         """Update data store and control Next button visibility based on input validation."""
         # Default styles - button hidden
         button_style = {"textAlign": "center", "marginTop": "20px", "display": "none"}
@@ -335,6 +354,9 @@ def register_callbacks(app):
             "material": material,
             "drawing_number": drawing_number,
             
+            # Unit of measurement
+            "unit": unit,
+            
             # Critical dimensions (required for visualization)
             "OD": outer_dia, 
             "TA": test_area,
@@ -342,12 +364,12 @@ def register_callbacks(app):
             "TH": total_height, 
             "NT": nominal_thickness, 
             "DT": design_thickness, 
-            "TT": threshold_percentage, 
+            "TT": thickness_threshold, 
             "threshold_type": threshold_type
         }
         
         # Check if critical fields for visualization are filled
-        critical_fields = [outer_dia, test_area, height, total_height, nominal_thickness, design_thickness, threshold_percentage]
+        critical_fields = [outer_dia, test_area, height, total_height, nominal_thickness, design_thickness, thickness_threshold]
         if not all(critical_fields):
             return all_data, "Please fill in all measurement fields", button_style, status_message
         
@@ -361,7 +383,7 @@ def register_callbacks(app):
 
             if threshold_type in ['nominal', 'design', 'custom']:
                 try:
-                    threshold_value = float(threshold_percentage)
+                    threshold_value = float(thickness_threshold)
                     if not 0 <= threshold_value <= 100:
                         return all_data, "Threshold Percentage must be between 0 and 100", button_style, status_message
                 except ValueError:

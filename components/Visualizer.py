@@ -2,12 +2,13 @@ import numpy as np
 import plotly.graph_objects as go
 import plotly.colors
 import plotly.express as px
+from components.Mapper import Mapper
 
 class Visualizer:
     """Class to create 2D and 3D visualizations with configurable value ranges."""
 
     @staticmethod
-    def set_color_ranges(property_value, min_thickness, design_thickness):
+    def set_color_ranges(property_value, min_thickness, design_thickness, percent_gap=25):
         # Create custom colorscale
         zmin, zmax = min_thickness, design_thickness
         colors = px.colors.sequential.Turbo_r
@@ -32,30 +33,33 @@ class Visualizer:
         # Find max value in actual data (excluding -1 values)
         max_data_value = np.max(property_value[property_value != -1]) if np.any(property_value != -1) else zmax
         
-        # Create ticks for the colorbar
-        base_ticks = 5  # Number of ticks in the 0-100% range
-        
-        # If max value exceeds zmax, add more ticks beyond 100%
+        # Create ticks for the colorbar based on percent_gap
         if max_data_value > zmax:
-            # Calculate how many additional ticks needed (in 25% increments)
+            # Calculate how many additional ticks needed (based on percent_gap)
             percent_of_max = (max_data_value - zmin) / (zmax - zmin) * 100
-            max_percent_rounded = int(np.ceil(percent_of_max / 25) * 25)  # Round up to nearest 25%
+            max_percent_rounded = int(np.ceil(percent_of_max / percent_gap) * percent_gap)
             
-            # Generate tick values
-            percent_ticks = list(range(0, 101, 25)) + list(range(100, max_percent_rounded + 1, 25))
-            tickvals = [zmin + (p/100) * (zmax - zmin) for p in percent_ticks]
-            ticktext = [f"{val:.1f} ({p}%)" for val, p in zip(tickvals, percent_ticks)]
+            # Generate all percentages from 0 to max_percent_rounded in steps of percent_gap
+            percent_ticks = list(range(0, max_percent_rounded + 1, percent_gap))
+            
+            # Add 100% if it's not already included and max > 100%
+            if 100 not in percent_ticks and max_percent_rounded > 100:
+                percent_ticks.append(100)
+                percent_ticks.sort()
         else:
             # Standard ticks if data is within range
-            num_ticks = base_ticks
-            tickvals = [zmin + (i * (zmax - zmin) / (num_ticks-1)) for i in range(num_ticks)]
-            ticktext = [f"{tickvals[i]:.1f} ({i * 100/(num_ticks-1):.0f}%)" for i in range(num_ticks)]
+            percent_ticks = list(range(0, 101, percent_gap))
+        
+        # Calculate tick values and text
+        tickvals = [zmin + (p/100) * (zmax - zmin) for p in percent_ticks]
+        ticktext = [f"{val:.1f} ({p}%)" for val, p in zip(tickvals, percent_ticks)]
+        
         
         return custom_colorscale, zmin, zmax, tickvals, ticktext, max_data_value
 
     @staticmethod
     def create_3d_figure(property_value: np.ndarray, radius: float, rows: int, cols: int,
-                        thickness: float, threshold_percentage: float) -> go.Figure:
+                        thickness: float, threshold_thickness: float) -> go.Figure:
         """Generate 3D visualization with configurable value ranges."""
         # Add second surface for actual values
         theta = np.linspace(0, 2 * np.pi, cols)
@@ -77,10 +81,9 @@ class Visualizer:
                     status = "Above threshold"
                 hover_text[i, j] = (f"Angle: {angle[i][j]//1} "
                                     f"Row: {i}, Column: {j}, "
-                                    f"Value: {value:.2f}, "
-                                    f"Status: {status}")
+                                    f"Value: {value:.2f}")
         
-        custom_colorscale, zmin, zmax, tickvals, ticktext, max_data_value = Visualizer.set_color_ranges(property_value)
+        custom_colorscale, zmin, zmax, tickvals, ticktext, max_data_value = Visualizer.set_color_ranges(property_value,threshold_thickness,thickness)
         
         
         fig = go.Figure()
@@ -121,7 +124,7 @@ class Visualizer:
 
     @staticmethod
     def create_2d_figure(df: np.ndarray, property_value: np.ndarray, rows: int, cols: int, 
-                    thickness: float) -> go.Figure:
+                    thickness: float, threshold_thickness: float) -> go.Figure:
         """Generate 2D visualization with configurable value ranges."""
         theta = np.linspace(0, 2 * np.pi, cols)
         z = np.linspace(0, rows, rows)
@@ -133,9 +136,9 @@ class Visualizer:
             for j in range(cols):
                 value = property_value[i][j]
                 row_text.append(f"Row: {i}, Column: {j}, Value: {value:.2f}")
-            hover_text.append(row_text)
+            hover_text.append(row_text) 
         
-        custom_colorscale, zmin, zmax, tickvals, ticktext, max_data_value = Visualizer.set_color_ranges(property_value)
+        custom_colorscale, zmin, zmax, tickvals, ticktext, max_data_value = Visualizer.set_color_ranges(property_value, threshold_thickness,thickness)
     
         
         # Create figure

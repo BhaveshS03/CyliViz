@@ -147,7 +147,7 @@ class UIComponents:
                 style={
                     "font-size": "14px",
                     "padding": "10px 12px",
-                    "width": "90%", # Take full width of container
+                    "width": "80%",
                     "text-align": "left",
                     "margin-bottom": "10px",
                     "border-radius": "8px",

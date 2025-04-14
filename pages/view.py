@@ -4,6 +4,7 @@ from dash import html, Output, Input, callback, dcc, callback_context, State
 from components.UIComponents import UIComponents
 from components.DataProcessor import DataProcessor
 from components.Visualizer import Visualizer
+from components.Mapper import Mapper
 import time
 
 
@@ -210,7 +211,7 @@ def register_callbacks(app):
             total_height = data["TH"]
             nominal_thickness = int(data["NT"])
             design_thickness = int(data["DT"])
-            threshold_percentage = int(data["TT"])
+            thickness_threshold = int(data["TT"])
             threshold_type = str(data["threshold_type"])
 
 
@@ -257,21 +258,21 @@ def register_callbacks(app):
             if view_type == '3d':
                 fig = Visualizer.create_3d_figure(
                     property_value, radius, rows, cols, 
-                    thickness, threshold_percentage
+                    thickness, thickness_threshold
                 )
             else:
                 fig = Visualizer.create_2d_figure(
                     df.to_numpy(), property_value, rows, cols, 
-                    thickness, threshold_percentage
+                    thickness, thickness_threshold
                 )
 
             success_message = f"Displaying {view_type.upper()} visualization. You can now view detailed results."
-            
+            custom_colorscale, zmin, zmax, tickvals, ticktext, max_data_value = Visualizer.set_color_ranges(property_value, thickness_threshold, thickness, percent_gap=25)
             return sheet_options, fig, success_message, {
                 "property_value": property_value, 
                 "T": thickness,  
-                "TT": threshold_percentage,
-                
+                "TT": thickness_threshold,
+                "map":Mapper.mapper(custom_colorscale,tickvals)
             }
             
         except Exception as e:
