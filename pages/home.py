@@ -306,7 +306,7 @@ def register_callbacks(app):
      Input("address", "value"),
      Input("date", "date"),
      Input("po-number", "value"),
-     Input("date-inspection", "value"),
+     Input("date-inspection", "date"),
      Input("make", "value"),
      Input("model", "value"),
      Input("sr-no", "value"),

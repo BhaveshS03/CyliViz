@@ -6,3 +6,4 @@ plotly
 pywebview
 waitress
 openpyxl
+typing-extensions
